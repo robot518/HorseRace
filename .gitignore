@@ -1,0 +1,9 @@
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Ll]ocal/
+*.DS_Store
+*.meta
+*.keystore
+*.jar
+*.manifest
