@@ -1,19 +1,13 @@
 const {ccclass, property} = cc._decorator;
 
+import {GLB} from "./GLBConfig";
+import {WS} from "./Socket";
+
 @ccclass
 export default class Lobby extends cc.Component {
 
     @property(cc.Node)
-    ndContent: cc.Node = null;
-
-    @property(cc.Node)
-    ndLoad: cc.Node = null;
-
-    @property(cc.Label)
-    labTime: cc.Label = null;
-
-    @property(cc.AudioSource)
-    music: cc.AudioSource = null;
+    ndMatch: cc.Node = null;
 
     @property({
         type: cc.AudioClip
@@ -57,9 +51,12 @@ export default class Lobby extends cc.Component {
 
     initEvent(){
         cc.find("start", this.node).on("click", function (argument) {
-            cc.director.loadScene("Level", function (err, scene) {
-                var obj = scene.getChildByName("Canvas").getComponent("Level");
-            });
+            this.playSound("click");
+            this.ndMatch.active = true;
+            WS.sendMsg(GLB.MATCH, "", this);
+            // cc.director.loadScene("Level", function (err, scene) {
+            //     var obj = scene.getChildByName("Canvas").getComponent("Level");
+            // });
         }, this);
         // cc.find("share", this.node).on("click", function (argument) {
         //     this.playSound("click");
@@ -77,9 +74,24 @@ export default class Lobby extends cc.Component {
     }
 
     initShow(){
-        // this.ndLoad.active = false;
-        // this.showScv();
-        // if (!CC_WECHATGAME) cc.find("share", this.node).active = false;
+
+    }
+
+    onResponse(cmd, msg){
+        var args = msg.split("|");
+        if (cmd == GLB.REGISTER || cmd == GLB.LOGIN){
+            // if (msg == "200"){ //成功
+            //     this.ndRegister.active = false;
+            //     this.initGLBData();
+            //     WS.sendMsg(GLB.GET_SCORE, GLB.sName, this);
+            // } else
+            //     this.playTips(msg);
+        }else if (cmd == GLB.MATCH){
+            cc.director.loadScene("Level", function (err, scene) {
+                var obj = scene.getChildByName("Canvas").getComponent("Level");
+                WS.obj = obj;
+            });
+        }
     }
 
     onWxEvent(s){
@@ -151,94 +163,6 @@ export default class Lobby extends cc.Component {
                 // }
                 break;
         }
-    }
-
-    showScv(){
-        // cc.sys.localStorage.setItem("level", 1);
-        var count = cc.sys.localStorage.getItem("level") || 1;
-        cc.log("count = ", count);
-        var children = this.ndContent.children;
-        count = 6;
-        for (let i = 0; i < 2; i++) {
-            cc.find("play", children[i]).on("click", function (argument) {
-                this.playSound("click");
-                if (i < count){
-                    this._iLv = i+1;
-                    this.loadMusic();
-                    // this.loadLvScene();
-                } else {
-                    this.onWxEvent("showVideo");
-                }
-            }, this);
-        };
-        for (let i = 2; i < 6; i++) {
-            cc.find("play", children[i]).on("click", function (argument) {
-                this.playSound("click");
-                this.onWxEvent("showVideo");
-            }, this);
-        };
-    }
-
-    loadMusic(){
-        this.ndLoad.active = true;
-        var remoteUrl = "http://47.111.184.119/MusicGame/Lv"+this._iLv+".mp3";
-        if (CC_WECHATGAME) {
-            // let audio = wx.createInnerAudioContext();
-            // audio.src = remoteUrl;
-            // audio.onError((res)=>{
-            //     console.log(res.errMsg);
-            //     console.log(res.errCode);
-            // });
-            // audio.onCanplay(()=>{
-            //     // console.log("可以播放");
-            //     if (this._bLoaded == true) return;
-            //     this.loadLvScene(audio);
-            // });
-            var self = this;
-            var downTask = wx.downloadFile({
-                url: remoteUrl,
-                success(res){
-                    if (res.statusCode == 200){
-                        let audio = wx.createInnerAudioContext();
-                        audio.src = res.tempFilePath;
-                        self.loadLvScene(audio);
-                    }
-                }
-            })
-            downTask.onProgressUpdate((res)=>{
-                this.labTime.string = res.progress.toString()+"%";
-            })
-        }else {
-            // remoteUrl = "../MusicGame/Lv"+this._iLv+".mp3";
-            cc.loader.load({url: remoteUrl, type: "mp3"}, this.onProgress.bind(this), this.onComplete.bind(this));
-        }
-    }
-
-    onProgress(completedCount, totalCount){
-        cc.log(completedCount, totalCount);
-    }
-
-    onComplete(err, res){
-        if (err || !res){
-            console.log(err);
-            return;
-        }
-        this.loadLvScene(res);
-    }
-
-    loadLvScene(res){
-        var lv = this._iLv;
-        // console.log("lv = " + lv);
-        this._bLoaded = true;
-        cc.director.loadScene("Level", function (err, scene) {
-            var obj = scene.getChildByName("Canvas").getComponent("Level");
-            obj.audioTask = res;
-            obj.iLv = lv;
-            var url = 'map/Lv'+lv;
-            // var url = "map/Lv"+this.iLv;
-            obj.onCreateTileMap(url);
-            if (res.offCanplay) res.offCanplay();
-        });
     }
 
     playSound(sName){

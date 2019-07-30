@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HorseRaceServer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HorseRaceServer_jar</output-path>
+    <root id="archive" name="HorseRaceServer.jar">
+      <element id="module-output" name="HorseRaceServer" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/Jar/commons-pool2-2.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/Jar/netty-all-4.1.32.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/Jar/jedis-3.0.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
