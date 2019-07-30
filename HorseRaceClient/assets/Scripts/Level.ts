@@ -46,10 +46,7 @@ export default class Level extends cc.Component {
         this.initEvent();
         this.initShow();
 
-        var manager = cc.director.getCollisionManager();
-        manager.enabled = true;
-        manager.enabledDebugDraw = true;
-        manager.enabledDrawBoundingBox = true;
+        cc.director.getCollisionManager().enabled = true;
 
         let time = 5;
         let self = this;
@@ -105,18 +102,6 @@ export default class Level extends cc.Component {
         }, this);
         cc.find("back", this.ndResult).on("click", function (argument) {
             cc.director.loadScene("Lobby");
-        }, this);
-        cc.find("temp", this.node).on("click", function(params) {
-            this.ndResult.active = !this.ndResult.active;
-        }, this);
-
-        this.line.on(cc.Node.EventType.TOUCH_START, function (touch, event) {
-            let touchLoc = touch.getLocation();
-            if (cc.Intersection.pointInPolygon(touchLoc, this.collider.world.points)) {
-                cc.log("Hit!");
-            } else {
-                cc.log("No hit");
-            }
         }, this);
     }
 
