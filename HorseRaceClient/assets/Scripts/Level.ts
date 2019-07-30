@@ -46,6 +46,11 @@ export default class Level extends cc.Component {
         this.initEvent();
         this.initShow();
 
+        var manager = cc.director.getCollisionManager();
+        manager.enabled = true;
+        manager.enabledDebugDraw = true;
+        manager.enabledDrawBoundingBox = true;
+
         let time = 5;
         let self = this;
         var seq = cc.sequence(cc.repeat(
@@ -66,10 +71,6 @@ export default class Level extends cc.Component {
         if (this._gameStatus == 1){
             this.line.y -= this._speed;
             if (this.line.y < -640) this.line.y = 640;
-            if (Math.abs(this.line.y - this.p1.y) <= 5 && this._bJump == false) {
-                WS.sendMsg(GLB.LOSE);
-                this.gameOver("输了");
-            }
         }
     }
 
@@ -108,6 +109,15 @@ export default class Level extends cc.Component {
         cc.find("temp", this.node).on("click", function(params) {
             this.ndResult.active = !this.ndResult.active;
         }, this);
+
+        this.line.on(cc.Node.EventType.TOUCH_START, function (touch, event) {
+            let touchLoc = touch.getLocation();
+            if (cc.Intersection.pointInPolygon(touchLoc, this.collider.world.points)) {
+                cc.log("Hit!");
+            } else {
+                cc.log("No hit");
+            }
+        }, this);
     }
 
     initShow(){
@@ -117,14 +127,9 @@ export default class Level extends cc.Component {
     onResponse(cmd, msg){
         var args = msg.split("|");
         if (cmd == GLB.JUMP){
-            var self = this;
-            this._bJump = true;
             var moveBy = cc.moveBy(0.5, cc.v2(100, 0));
             var moveBack = cc.moveBy(0.5, cc.v2(-100, 0));
-            var cb = cc.callFunc(()=>{
-                self._bJump = false;
-            })
-            var seq = cc.sequence(moveBy, moveBack, cb);
+            var seq = cc.sequence(moveBy, moveBack);
             this.p2.runAction(seq);
         }else if (cmd == GLB.LOSE){
             this.gameOver("赢了");
@@ -172,5 +177,12 @@ export default class Level extends cc.Component {
 
     playSound(sName){
         if (sName == "click") cc.audioEngine.play(this.audioClick, false, 1);
+    }
+
+    onCol(){
+        if (this._bJump == false) {
+            WS.sendMsg(GLB.LOSE);
+            this.gameOver("输了");
+        }
     }
 }
