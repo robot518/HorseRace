@@ -10,5 +10,6 @@ var GLB = {
     MATCH: "match",
     JUMP: "jump",
     LOSE: "lose",
+    START: "start",
 };
 export {GLB};

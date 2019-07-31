@@ -51,9 +51,31 @@ export default class Lobby extends cc.Component {
 
     initEvent(){
         cc.find("start", this.node).on("click", function (argument) {
-            this.playSound("click");
-            this.ndMatch.active = true;
-            WS.sendMsg(GLB.MATCH, "", this);
+            wx.login({
+                success (res) {
+                    if (res.code) {
+                        //发起网络请求
+                        console.log("code = ", res.code);
+                        wx.request({
+                            url: 'http://127.0.0.1:8080',
+                            data: {
+                                code: res.code
+                            },
+                            success(response){
+                                console.log("success response = ", response);
+                            },
+                            fail(response){
+                                console.log("fail response = ", response);
+                            }
+                        })
+                    } else {
+                        console.log('登录失败！' + res.errMsg)
+                    }
+                }
+            })
+            // this.playSound("click");
+            // this.ndMatch.active = true;
+            // WS.sendMsg(GLB.MATCH, "", this);
             // cc.director.loadScene("Level", function (err, scene) {
             //     var obj = scene.getChildByName("Canvas").getComponent("Level");
             // });

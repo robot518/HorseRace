@@ -3,7 +3,7 @@ const {ccclass, property} = cc._decorator;
 import {GLB} from "./GLBConfig";
 import {WS} from "./Socket";
 
-var SPEED = 5;
+var SPEED = 9;
 
 @ccclass
 export default class Level extends cc.Component {
@@ -23,6 +23,9 @@ export default class Level extends cc.Component {
     @property(cc.Node)
     ndBtn: cc.Node = null;
 
+    @property(cc.AudioSource)
+    music: cc.AudioSource = null;
+
     @property(cc.Label)
     labTime: cc.Label = null;
 
@@ -30,6 +33,21 @@ export default class Level extends cc.Component {
         type: cc.AudioClip
     })
     audioClick: cc.AudioClip = null;
+
+    @property({
+        type: cc.AudioClip
+    })
+    audioWin: cc.AudioClip = null;
+
+    @property({
+        type: cc.AudioClip
+    })
+    audioLose: cc.AudioClip = null;
+
+    @property({
+        type: cc.AudioClip
+    })
+    audioFault: cc.AudioClip = null;
     
     _gameStatus: number; //0准备开始 1游戏中 2游戏结束 3暂停游戏 4音乐中断
     _speed: number;
@@ -117,6 +135,8 @@ export default class Level extends cc.Component {
             var seq = cc.sequence(moveBy, moveBack);
             this.p2.runAction(seq);
         }else if (cmd == GLB.LOSE){
+            this.music.stop();
+            this.playSound("win");
             this.gameOver("赢了");
         }
     }
@@ -146,6 +166,7 @@ export default class Level extends cc.Component {
         this._gameStatus = 1;
         this._iCount = 0;
         this._bJump = false;
+        this.music.play();
     }
 
     gameOver(str){
@@ -161,13 +182,33 @@ export default class Level extends cc.Component {
     }
 
     playSound(sName){
-        if (sName == "click") cc.audioEngine.play(this.audioClick, false, 1);
+        switch(sName){
+            case "click":
+                cc.audioEngine.play(this.audioClick, false, 1);
+                break;
+            case "win":
+                cc.audioEngine.play(this.audioWin, false, 1);
+                break;
+            case "lose":
+                cc.audioEngine.play(this.audioLose, false, 1);
+                break;
+            case "fault":
+                cc.audioEngine.play(this.audioFault, false, 1);
+                break;
+        }
     }
 
     onCol(){
         if (this._bJump == false) {
             WS.sendMsg(GLB.LOSE);
-            this.gameOver("输了");
+            this.music.stop();
+            this.playSound("fault");
+            this._gameStatus = 2;
+            var self = this;
+            this.labTime.scheduleOnce(function (argument) {
+                self.playSound("lose");
+                self.gameOver("输了");
+            }, 1)
         }
     }
 }
