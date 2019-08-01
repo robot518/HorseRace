@@ -16,20 +16,15 @@
 package websocketx;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
-
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.socket.nio.NioSocketChannel;
 
 /**
  * A HTTP server which serves Web Socket requests at:
@@ -82,39 +77,6 @@ public final class WebSocketServer {
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
-        }
-    }
-
-    public static void sendRequest(String code){
-        EventLoopGroup group = new NioEventLoopGroup();
-        String host = "api.weixin.qq.com";
-        try {
-            Bootstrap b = new Bootstrap();
-            b.group(group)
-                    .channel(NioSocketChannel.class);
-//                    .handler(new HttpSnoopClientInitializer(sslCtx));
-
-            // Make the connection attempt.
-//            Channel ch = b.connect(host, 80).sync().channel();
-
-            // Prepare the HTTP request.
-            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "https://api.weixin.qq.com/sns/", Unpooled.EMPTY_BUFFER);
-            request.headers().set(HttpHeaderNames.HOST, host);
-            request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-            request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-            request.headers().set("appid", "wx4e23a5ec42c5a796");
-            request.headers().set("secret", "cbccb6fc48672b16dbd81b58154bc5d5");
-            request.headers().set("js_code", code);
-            request.headers().set("grant_type", "authorization_code");
-
-//            // Send the HTTP request.
-//            ch.writeAndFlush(request);
-//
-//            // Wait for the server to close the connection.
-//            ch.closeFuture().sync();
-        } finally {
-            // Shut down executor threads to exit.
-            group.shutdownGracefully();
         }
     }
 }

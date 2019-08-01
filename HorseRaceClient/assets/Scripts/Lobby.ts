@@ -63,6 +63,9 @@ export default class Lobby extends cc.Component {
                             },
                             success(response){
                                 console.log("success response = ", response);
+                                console.log("usrid = ", response.data);
+                                // cc.sys.localStorage.setItem("usrId", response.data);
+                                // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
                             },
                             fail(response){
                                 console.log("fail response = ", response);
@@ -73,6 +76,12 @@ export default class Lobby extends cc.Component {
                     }
                 }
             })
+            // wx.checkSession({
+            //     fail () {
+                    
+            //     }
+            // })
+            
             // this.playSound("click");
             // this.ndMatch.active = true;
             // WS.sendMsg(GLB.MATCH, "", this);

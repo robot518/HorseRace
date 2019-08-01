@@ -3,7 +3,9 @@ const {ccclass, property} = cc._decorator;
 import {GLB} from "./GLBConfig";
 import {WS} from "./Socket";
 
-var SPEED = 9;
+let second = 2;
+let SPEED = 720/second;
+let TTIME = [0,1,3,4,6,7,8,9];
 
 @ccclass
 export default class Level extends cc.Component {
@@ -14,8 +16,8 @@ export default class Level extends cc.Component {
     @property(cc.Node)
     p2: cc.Node = null;
 
-    @property(cc.Node)
-    line: cc.Node = null;
+    @property([cc.Node])
+    lines: cc.Node[] = [];
 
     @property(cc.Node)
     ndResult: cc.Node = null;
@@ -53,6 +55,11 @@ export default class Level extends cc.Component {
     _speed: number;
     _iCount: number;
     _bJump: boolean;
+    _iTime: number;
+    tTime: number[];
+    _iTimeIdx: number;
+    tOnRun: any[];
+    _iLineIdx: number;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -66,26 +73,41 @@ export default class Level extends cc.Component {
 
         cc.director.getCollisionManager().enabled = true;
 
-        let time = 5;
+        let time = 3;
         let self = this;
         var seq = cc.sequence(cc.repeat(
             cc.sequence(cc.delayTime(1),
                 cc.callFunc(()=>{
                     time--;
                     self.labTime.string = time.toString();
-                })), 5), 
+                })), 2), 
             cc.delayTime(1),
             cc.callFunc(()=>{
                 self.gameStart();
                 self.labTime.node.parent.active = false;
             }));
+        this.labTime.string = time.toString();
         this.labTime.node.runAction(seq);
     }
 
     update (dt) {
         if (this._gameStatus == 1){
-            this.line.y -= this._speed;
-            if (this.line.y < -640) this.line.y = 640;
+            this._iTime += dt;
+            if (this._iTime >= this.tTime[this._iTimeIdx]){
+                // this.lines[this._iTimeIdx-1].y -= this._speed*dt;
+                this.tOnRun.unshift(this.lines[this._iLineIdx]);
+                this._iTimeIdx++;
+                this._iLineIdx++;
+                if (this._iLineIdx >= 6) this._iLineIdx -= 6;
+            }
+            for (let i = this.tOnRun.length-1; i >= 0; i--){
+                let nd = this.tOnRun[i];
+                nd.y -= this._speed*dt;
+                if (nd.y < -640){
+                    nd.y = 640;
+                    this.tOnRun.pop();
+                }
+            }
         }
     }
 
@@ -144,10 +166,12 @@ export default class Level extends cc.Component {
     jump(){
         var self = this;
         this._bJump = true;
-        var moveBy = cc.moveBy(0.5, cc.v2(100, 0));
-        var moveBack = cc.moveBy(0.5, cc.v2(-100, 0));
+        this.music.stop();
+        var moveBy = cc.moveBy(0.2, cc.v2(0, 30));
+        var moveBack = cc.moveBy(0.1, cc.v2(0, -30));
         var cb = cc.callFunc(()=>{
             self._bJump = false;
+            self.music.play();
         })
         var seq = cc.sequence(moveBy, moveBack, cb);
         this.p1.runAction(seq);
@@ -167,6 +191,11 @@ export default class Level extends cc.Component {
         this._iCount = 0;
         this._bJump = false;
         this.music.play();
+        this._iTime = 0;
+        this.tTime = TTIME;
+        this._iTimeIdx = 0;
+        this._iLineIdx = 0;
+        this.tOnRun = [];
     }
 
     gameOver(str){

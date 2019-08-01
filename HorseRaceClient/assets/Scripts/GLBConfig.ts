@@ -3,6 +3,7 @@ var GLB = {
     ip: "http://47.111.184.119",
     // ip: "127.0.0.1",
     msgBox: null,
+    usrId: null,
 
     //event
     REGISTER: "register",
