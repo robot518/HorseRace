@@ -5,7 +5,10 @@ import {WS} from "./Socket";
 
 let second = 2;
 let SPEED = 720/second;
+//srcvp(585,720) desvp(-355,-720)
+let SPEEDX = SPEED*(585+355)/(720+720);
 let TTIME = [0,1,3,4,6,7,8,9];
+let TLINES = [0,1,0,1,0,1,0,1];
 
 @ccclass
 export default class Level extends cc.Component {
@@ -13,11 +16,11 @@ export default class Level extends cc.Component {
     @property(cc.Node)
     p1: cc.Node = null;
 
-    @property(cc.Node)
-    p2: cc.Node = null;
-
     @property([cc.Node])
     lines: cc.Node[] = [];
+
+    @property([cc.Node])
+    lines2: cc.Node[] = [];
 
     @property(cc.Node)
     ndResult: cc.Node = null;
@@ -60,6 +63,7 @@ export default class Level extends cc.Component {
     _iTimeIdx: number;
     tOnRun: any[];
     _iLineIdx: number;
+    _iLineIdx2: number;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -71,7 +75,11 @@ export default class Level extends cc.Component {
         this.initEvent();
         this.initShow();
 
-        cc.director.getCollisionManager().enabled = true;
+        // cc.director.getCollisionManager().enabled = true;
+        let mgr = cc.director.getCollisionManager();
+        mgr.enabled = true;
+        mgr.enabledDebugDraw = true;
+        mgr.enabledDrawBoundingBox = true;
 
         let time = 3;
         let self = this;
@@ -94,17 +102,25 @@ export default class Level extends cc.Component {
         if (this._gameStatus == 1){
             this._iTime += dt;
             if (this._iTime >= this.tTime[this._iTimeIdx]){
-                // this.lines[this._iTimeIdx-1].y -= this._speed*dt;
-                this.tOnRun.unshift(this.lines[this._iLineIdx]);
+                let line = TLINES[this._iTimeIdx];
+                if (line == 0){
+                    this.tOnRun.unshift(this.lines[this._iLineIdx]);
+                    this._iLineIdx++;
+                    if (this._iLineIdx >= 6) this._iLineIdx -= 6;
+                }else{
+                    this.tOnRun.unshift(this.lines2[this._iLineIdx2]);
+                    this._iLineIdx2++;
+                    if (this._iLineIdx2 >= 6) this._iLineIdx2 -= 6;
+                }
                 this._iTimeIdx++;
-                this._iLineIdx++;
-                if (this._iLineIdx >= 6) this._iLineIdx -= 6;
             }
             for (let i = this.tOnRun.length-1; i >= 0; i--){
                 let nd = this.tOnRun[i];
                 nd.y -= this._speed*dt;
-                if (nd.y < -640){
-                    nd.y = 640;
+                nd.x -= SPEEDX*dt;
+                if (nd.y < -720){
+                    nd.y = 720;
+                    nd.x = 585
                     this.tOnRun.pop();
                 }
             }
@@ -134,7 +150,6 @@ export default class Level extends cc.Component {
                 // this.gameStart();
             }else if (this._gameStatus == 1){
                 if (this._bJump == true) return;
-                WS.sendMsg(GLB.JUMP);
                 this.jump();
             } else if (this._gameStatus == 3){
                 // this._gameStatus = 1;
@@ -147,34 +162,44 @@ export default class Level extends cc.Component {
 
     initShow(){
         this.labTime.node.parent.active = true;
+        for (let i = 0; i < 5; i++){
+            let nd = cc.instantiate(this.lines[0]);
+            nd.parent = this.lines[0].parent;
+            this.lines.push(nd);
+            let nd2 = cc.instantiate(this.lines2[0]);
+            nd2.parent = this.lines[0].parent;
+            this.lines2.push(nd2);
+        }
     }
 
     onResponse(cmd, msg){
         var args = msg.split("|");
-        if (cmd == GLB.JUMP){
-            var moveBy = cc.moveBy(0.5, cc.v2(100, 0));
-            var moveBack = cc.moveBy(0.5, cc.v2(-100, 0));
-            var seq = cc.sequence(moveBy, moveBack);
-            this.p2.runAction(seq);
-        }else if (cmd == GLB.LOSE){
+        if (cmd == GLB.LOSE){
             this.music.stop();
             this.playSound("win");
             this.gameOver("赢了");
         }
     }
 
+    onJumpDown(){
+        this._bJump = false;
+        this.music.play();
+    }
+
     jump(){
-        var self = this;
+        // var self = this;
         this._bJump = true;
         this.music.stop();
-        var moveBy = cc.moveBy(0.2, cc.v2(0, 30));
-        var moveBack = cc.moveBy(0.1, cc.v2(0, -30));
-        var cb = cc.callFunc(()=>{
-            self._bJump = false;
-            self.music.play();
-        })
-        var seq = cc.sequence(moveBy, moveBack, cb);
-        this.p1.runAction(seq);
+        // let anim = this.p1.getComponent(cc.Animation);
+        // var cb = cc.callFunc(()=>{
+        //     self._bJump = false;
+        //     self.music.play();
+        //     anim.play("run");
+        // })
+        // var seq = cc.sequence(cc.delayTime(1), cb);
+        // this.p1.runAction(seq);
+        // anim.play("jump");
+        this.p1.getComponent(cc.Animation).play("jump");
     }
 
     showResult(str){
@@ -184,8 +209,6 @@ export default class Level extends cc.Component {
     gameStart(){
         var anim1 = this.p1.getComponent(cc.Animation);
         anim1.play();
-        var anim2 = this.p2.getComponent(cc.Animation);
-        anim2.play();
         this._speed = SPEED;
         this._gameStatus = 1;
         this._iCount = 0;
@@ -195,19 +218,15 @@ export default class Level extends cc.Component {
         this.tTime = TTIME;
         this._iTimeIdx = 0;
         this._iLineIdx = 0;
+        this._iLineIdx2 = 0;
         this.tOnRun = [];
     }
 
     gameOver(str){
         this._gameStatus = 2;
-        var anim1 = this.p1.getComponent(cc.Animation);
-        anim1.stop();
-        var anim2 = this.p2.getComponent(cc.Animation);
-        anim2.stop();
-        this.ndResult.active = true;
-        this.p1.active = false;
-        this.p2.active = false;
-        this.showResult(str);
+        // this.ndResult.active = true;
+        // this.p1.active = false;
+        // this.showResult(str);
     }
 
     playSound(sName){
@@ -228,16 +247,16 @@ export default class Level extends cc.Component {
     }
 
     onCol(){
-        if (this._bJump == false) {
-            WS.sendMsg(GLB.LOSE);
-            this.music.stop();
-            this.playSound("fault");
-            this._gameStatus = 2;
-            var self = this;
-            this.labTime.scheduleOnce(function (argument) {
-                self.playSound("lose");
-                self.gameOver("输了");
-            }, 1)
-        }
+        WS.sendMsg(GLB.LOSE);
+        this.music.stop();
+        this.playSound("fault");
+        this._gameStatus = 2;
+        let anim1 = this.p1.getComponent(cc.Animation);
+        anim1.stop();
+        let self = this;
+        this.labTime.scheduleOnce(function (argument) {
+            self.playSound("lose");
+            self.gameOver("输了");
+        }, 1)
     }
 }

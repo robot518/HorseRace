@@ -9,6 +9,9 @@ export default class Lobby extends cc.Component {
     @property(cc.Node)
     ndMatch: cc.Node = null;
 
+    @property(cc.Node)
+    btnMatch: cc.Node = null;
+
     @property({
         type: cc.AudioClip
     })
@@ -18,6 +21,7 @@ export default class Lobby extends cc.Component {
     _videoAd: any;
     _bannerAd: any;
     _bLoaded: boolean;
+    UserInfoButton: any;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -50,49 +54,19 @@ export default class Lobby extends cc.Component {
     }
 
     initEvent(){
-        cc.find("start", this.node).on("click", function (argument) {
-            wx.login({
-                success (res) {
-                    if (res.code) {
-                        //发起网络请求
-                        console.log("code = ", res.code);
-                        wx.request({
-                            url: 'http://127.0.0.1:8080',
-                            data: {
-                                code: res.code
-                            },
-                            success(response){
-                                console.log("success response = ", response);
-                                console.log("usrid = ", response.data);
-                                // cc.sys.localStorage.setItem("usrId", response.data);
-                                // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
-                            },
-                            fail(response){
-                                console.log("fail response = ", response);
-                            }
-                        })
-                    } else {
-                        console.log('登录失败！' + res.errMsg)
-                    }
-                }
-            })
-            // wx.checkSession({
-            //     fail () {
-                    
-            //     }
-            // })
-            
-            // this.playSound("click");
-            // this.ndMatch.active = true;
-            // WS.sendMsg(GLB.MATCH, "", this);
-            // cc.director.loadScene("Level", function (err, scene) {
-            //     var obj = scene.getChildByName("Canvas").getComponent("Level");
-            // });
+        var self = this;
+        this.onWxEvent("auth");
+        cc.find("share", this.node).on("click", function (argument) {
+            this.playSound("click");
+            this.onWxEvent("share");
         }, this);
-        // cc.find("share", this.node).on("click", function (argument) {
-        //     this.playSound("click");
-        //     this.onWxEvent("share");
-        // }, this);
+        cc.find("btnMatch", this.node).on("click", function (argument) {
+            // this.onMatch();
+            cc.director.loadScene("Level", function (err, scene) {
+                var obj = scene.getChildByName("Canvas").getComponent("Level");
+                WS.obj = obj;
+            });
+        }, this);
         // this.onWxEvent("initBanner");
         // this.onWxEvent("initVideo");
         // if (CC_WECHATGAME && cc.sys.os === cc.sys.OS_ANDROID){
@@ -105,7 +79,7 @@ export default class Lobby extends cc.Component {
     }
 
     initShow(){
-
+        if (this.UserInfoButton) this.UserInfoButton.show();
     }
 
     onResponse(cmd, msg){
@@ -118,6 +92,7 @@ export default class Lobby extends cc.Component {
             // } else
             //     this.playTips(msg);
         }else if (cmd == GLB.MATCH){
+            // this.showMatchOther();
             cc.director.loadScene("Level", function (err, scene) {
                 var obj = scene.getChildByName("Canvas").getComponent("Level");
                 WS.obj = obj;
@@ -127,6 +102,7 @@ export default class Lobby extends cc.Component {
 
     onWxEvent(s){
         if (!CC_WECHATGAME) return;
+        let self = this;
         switch(s){
             case "initBanner":
                 // if (this._bannerAd != null)
@@ -193,10 +169,119 @@ export default class Lobby extends cc.Component {
                 //     })
                 // }
                 break;
+            case "getUserInfo":
+                wx.getUserInfo({
+                    success: function(res) {
+                        console.log("Res = ", res);
+                        GLB.userInfo = res.userInfo;
+                    //   var nickName = userInfo.nickName
+                    //   var avatarUrl = userInfo.avatarUrl
+                    //   var gender = userInfo.gender //性别 0：未知、1：男、2：女
+                    //   var province = userInfo.province
+                    //   var city = userInfo.city
+                    //   var country = userInfo.country
+                    }
+                })
+                break;
+            case "auth":
+                wx.getSetting({
+                    success(res) {
+                        if (!res.authSetting['scope.userInfo']) {
+                            self.btnMatch.active = false;
+                            let size = cc.view.getFrameSize();
+                            let dSize = self.node.getComponent(cc.Canvas).designResolution;
+                            let pix = 1;
+                            if (size.width/size.height >= dSize.width/dSize.height){
+                                pix = dSize.height/size.height;
+                            }else pix = dSize.width/size.width;
+                            let width = 166*pix/2, height = 71*pix/2;
+                            console.log(width, height, pix);
+                            self.UserInfoButton = wx.createUserInfoButton({
+                                type: 'image',
+                                image: 'http://windgzs.cn/images/play.png',
+                                // withCredentials: false,
+                                style: {
+                                    left: size.width/2 - width/2,
+                                    top: size.height/2 - 3*height/4,
+                                    width: width,
+                                    height: height,
+                                    // lineHeight: 40,
+                                    // backgroundColor: '#000000',
+                                    // color: '#ffffff',
+                                    textAlign: 'center',
+                                    fontSize: 16,
+                                    // borderRadius: 4
+                                }
+                            })
+                            self.UserInfoButton.onTap((res) => {
+                                // GLB.userInfo = res;
+                                console.log("Res = ", res);
+                                // self.onMatch();
+                            })
+                        }else{
+                            self.onWxEvent("getUserInfo");
+                            self.btnMatch.active = true;
+                        }
+                    }
+                })
+                break;
+            case "login":
+                // wx.login({
+            //     success (res) {
+            //         if (res.code) {
+            //             //发起网络请求
+            //             console.log("code = ", res.code);
+            //             wx.request({
+            //                 url: 'http://127.0.0.1:8080',
+            //                 data: {
+            //                     code: res.code
+            //                 },
+            //                 success(response){
+            //                     console.log("success response = ", response);
+            //                     console.log("usrid = ", response.data);
+            //                     // cc.sys.localStorage.setItem("usrId", response.data);
+            //                     // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
+            //                 },
+            //                 fail(response){
+            //                     console.log("fail response = ", response);
+            //                 }
+            //             })
+            //         } else {
+            //             console.log('登录失败！' + res.errMsg)
+            //         }
+            //     }
+            // })
+            // wx.checkSession({
+            //     fail () {
+                    
+            //     }
+            // })
+                break;
         }
     }
 
     playSound(sName){
         if (sName == "click") cc.audioEngine.play(this.audioClick, false, 1);
+    }
+
+    onMatch(){
+        this.ndMatch.active = true;
+        if (GLB.userInfo){
+            let me = cc.find("me", this.ndMatch);
+            me.getChildByName("lab").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+            cc.loader.load({ url: GLB.userInfo.avatarUrl }, (error, texture) => {
+                me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+            });
+        }
+        WS.sendMsg(GLB.MATCH, "", this);
+    }
+
+    showMatchOther(res){
+        // let other = cc.find("other", this.ndMatch);
+    }
+
+    getStrName(s: string){
+        if (s.length > 5) s = s.substring(0, 5)+"...";
+        return s;
     }
 }

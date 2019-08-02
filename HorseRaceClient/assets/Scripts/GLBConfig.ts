@@ -4,13 +4,14 @@ var GLB = {
     // ip: "127.0.0.1",
     msgBox: null,
     usrId: null,
+    userInfo: null,
+    otherInfo: null,
 
     //event
     REGISTER: "register",
     LOGIN: "login",
     MATCH: "match",
-    JUMP: "jump",
     LOSE: "lose",
-    START: "start",
+    // START: "start",
 };
 export {GLB};
