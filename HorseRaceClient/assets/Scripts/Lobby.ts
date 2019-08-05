@@ -60,12 +60,12 @@ export default class Lobby extends cc.Component {
             this.playSound("click");
             this.onWxEvent("share");
         }, this);
-        cc.find("btnMatch", this.node).on("click", function (argument) {
-            // this.onMatch();
-            cc.director.loadScene("Level", function (err, scene) {
-                var obj = scene.getChildByName("Canvas").getComponent("Level");
-                WS.obj = obj;
-            });
+        this.btnMatch.on("click", function (argument) {
+            this.onMatch();
+            // cc.director.loadScene("Level", function (err, scene) {
+            //     var obj = scene.getChildByName("Canvas").getComponent("Level");
+            //     WS.obj = obj;
+            // });
         }, this);
         // this.onWxEvent("initBanner");
         // this.onWxEvent("initVideo");
@@ -169,58 +169,60 @@ export default class Lobby extends cc.Component {
                 //     })
                 // }
                 break;
-            case "getUserInfo":
-                wx.getUserInfo({
-                    success: function(res) {
-                        console.log("Res = ", res);
-                        GLB.userInfo = res.userInfo;
-                    //   var nickName = userInfo.nickName
-                    //   var avatarUrl = userInfo.avatarUrl
-                    //   var gender = userInfo.gender //性别 0：未知、1：男、2：女
-                    //   var province = userInfo.province
-                    //   var city = userInfo.city
-                    //   var country = userInfo.country
-                    }
-                })
-                break;
             case "auth":
                 wx.getSetting({
                     success(res) {
                         if (!res.authSetting['scope.userInfo']) {
-                            self.btnMatch.active = false;
+                            // self.btnMatch.active = false;
                             let size = cc.view.getFrameSize();
                             let dSize = self.node.getComponent(cc.Canvas).designResolution;
                             let pix = 1;
                             if (size.width/size.height >= dSize.width/dSize.height){
                                 pix = dSize.height/size.height;
                             }else pix = dSize.width/size.width;
-                            let width = 166*pix/2, height = 71*pix/2;
-                            console.log(width, height, pix);
+                            let width = self.btnMatch.width/pix, height = self.btnMatch.height/pix;
+                            // console.log(size, width, height, pix);
                             self.UserInfoButton = wx.createUserInfoButton({
-                                type: 'image',
-                                image: 'http://windgzs.cn/images/play.png',
+                                type: 'text',
+                                text: '',
+                                // image: 'http://windgzs.cn/images/play.png',
                                 // withCredentials: false,
                                 style: {
-                                    left: size.width/2 - width/2,
-                                    top: size.height/2 - 3*height/4,
+                                    left: size.width/2-width/2,
+                                    top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
                                     width: width,
                                     height: height,
-                                    // lineHeight: 40,
-                                    // backgroundColor: '#000000',
+                                    
+                                    // backgroundColor: '#ff0000',
+                                    // boderColor: '#888888',
+                                    // boderWidth: 0,
+                                    // borderRadius: 0,
                                     // color: '#ffffff',
-                                    textAlign: 'center',
-                                    fontSize: 16,
-                                    // borderRadius: 4
+                                    // textAlign: 'center',
+                                    // fontSize: 16,
+                                    // lineHeight: 0,
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {
-                                // GLB.userInfo = res;
+                                GLB.userInfo = res.userInfo;
                                 console.log("Res = ", res);
-                                // self.onMatch();
+                                self.onMatch();
+                                self.UserInfoButton.hide();
                             })
                         }else{
-                            self.onWxEvent("getUserInfo");
-                            self.btnMatch.active = true;
+                            wx.getUserInfo({
+                                success(res){
+                                    console.log("Res = ", res);
+                                    GLB.userInfo = res.userInfo;
+                                    //   var nickName = userInfo.nickName
+                                    //   var avatarUrl = userInfo.avatarUrl
+                                    //   var gender = userInfo.gender //性别 0：未知、1：男、2：女
+                                    //   var province = userInfo.province
+                                    //   var city = userInfo.city
+                                    //   var country = userInfo.country
+                                }
+                            })
+                            // self.btnMatch.active = true;
                         }
                     }
                 })
@@ -267,9 +269,9 @@ export default class Lobby extends cc.Component {
     onMatch(){
         this.ndMatch.active = true;
         if (GLB.userInfo){
-            let me = cc.find("me", this.ndMatch);
-            me.getChildByName("lab").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
-            cc.loader.load({ url: GLB.userInfo.avatarUrl }, (error, texture) => {
+            let me = this.ndMatch.getChildByName("me");
+            me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+            cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
                 me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
             });
         }
