@@ -32,6 +32,7 @@ export default class Lobby extends cc.Component {
         this.initParas();
         this.initEvent();
         this.initShow();
+        this.initMsgBox();
     }
 
     // update (dt) {}
@@ -54,7 +55,6 @@ export default class Lobby extends cc.Component {
     }
 
     initEvent(){
-        var self = this;
         this.onWxEvent("auth");
         cc.find("share", this.node).on("click", function (argument) {
             this.playSound("click");
@@ -80,6 +80,27 @@ export default class Lobby extends cc.Component {
 
     initShow(){
         if (this.UserInfoButton) this.UserInfoButton.show();
+        WS.sendMsg("0");
+    }
+
+    initMsgBox(){
+        if (GLB.msgBox == null){
+            var msgBox = cc.find("msgBox");
+            GLB.msgBox = msgBox;
+            cc.game.addPersistRootNode(msgBox);
+            cc.find("btn", msgBox).on("click", function (argument) {
+                if (GLB.isClickCd) return;
+                GLB.isClickCd = true;
+                setTimeout(function() {
+                    GLB.isClickCd = false;
+                }, 1000);
+                msgBox.active = false;
+                if (WS.ws.readyState !== WebSocket.OPEN) WS.reconnect();
+            }, cc.game);
+            msgBox.on("click", function (argument) {
+                msgBox.active = false;
+            }, cc.game);
+        }
     }
 
     onResponse(cmd, msg){
@@ -92,7 +113,7 @@ export default class Lobby extends cc.Component {
             // } else
             //     this.playTips(msg);
         }else if (cmd == GLB.MATCH){
-            // this.showMatchOther();
+            this.showMatchOther([]);
             cc.director.loadScene("Level", function (err, scene) {
                 var obj = scene.getChildByName("Canvas").getComponent("Level");
                 WS.obj = obj;
@@ -173,7 +194,6 @@ export default class Lobby extends cc.Component {
                 wx.getSetting({
                     success(res) {
                         if (!res.authSetting['scope.userInfo']) {
-                            // self.btnMatch.active = false;
                             let size = cc.view.getFrameSize();
                             let dSize = self.node.getComponent(cc.Canvas).designResolution;
                             let pix = 1;
@@ -185,41 +205,25 @@ export default class Lobby extends cc.Component {
                             self.UserInfoButton = wx.createUserInfoButton({
                                 type: 'text',
                                 text: '',
-                                // image: 'http://windgzs.cn/images/play.png',
                                 // withCredentials: false,
                                 style: {
                                     left: size.width/2-width/2,
                                     top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
                                     width: width,
                                     height: height,
-                                    
-                                    // backgroundColor: '#ff0000',
-                                    // boderColor: '#888888',
-                                    // boderWidth: 0,
-                                    // borderRadius: 0,
-                                    // color: '#ffffff',
-                                    // textAlign: 'center',
-                                    // fontSize: 16,
-                                    // lineHeight: 0,
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {
                                 GLB.userInfo = res.userInfo;
-                                console.log("Res = ", res);
+                                // console.log("Res = ", res);
                                 self.onMatch();
                                 self.UserInfoButton.hide();
                             })
                         }else{
                             wx.getUserInfo({
                                 success(res){
-                                    console.log("Res = ", res);
+                                    // console.log("Res = ", res);
                                     GLB.userInfo = res.userInfo;
-                                    //   var nickName = userInfo.nickName
-                                    //   var avatarUrl = userInfo.avatarUrl
-                                    //   var gender = userInfo.gender //性别 0：未知、1：男、2：女
-                                    //   var province = userInfo.province
-                                    //   var city = userInfo.city
-                                    //   var country = userInfo.country
                                 }
                             })
                             // self.btnMatch.active = true;
@@ -267,23 +271,33 @@ export default class Lobby extends cc.Component {
     }
 
     onMatch(){
-        this.ndMatch.active = true;
-        if (GLB.userInfo){
-            let me = this.ndMatch.getChildByName("me");
-            me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
-            cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
-                me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
-            });
+        if (WS.sendMsg(GLB.MATCH, "", this)){
+            this.ndMatch.active = true;
+            if (GLB.userInfo){
+                let me = this.ndMatch.getChildByName("me");
+                me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+                cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+                });
+            }
         }
-        WS.sendMsg(GLB.MATCH, "", this);
     }
 
     showMatchOther(res){
-        // let other = cc.find("other", this.ndMatch);
+        GLB.otherInfo = res;
+        if (GLB.otherInfo && GLB.otherInfo instanceof Object){
+            let other = this.ndMatch.getChildByName("other");
+            other.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.otherInfo.nickName);
+            if (GLB.otherInfo.avatarUrl){
+                cc.loader.load({ url: GLB.otherInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    other.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+                });
+            }
+        }
     }
 
     getStrName(s: string){
-        if (s.length > 5) s = s.substring(0, 5)+"...";
+        if (s && s.length > 5) s = s.substring(0, 5)+"...";
         return s;
     }
 }

@@ -19,6 +19,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 
 import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
@@ -51,8 +53,8 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
         SocketAddress addr = ctx.channel().remoteAddress();
 //        Redis.getInstance().setRecord(sDate, getStrAddress(addr), -1);
         hCtx.put(addr, ctx);
-        hHeartTime.put(addr, 0);
-        runHeartBeat(addr);
+//        hHeartTime.put(addr, 0);
+//        runHeartBeat(addr);
     }
 
     @Override
@@ -62,7 +64,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
         String sDate = new SimpleDateFormat("MMdd").format(new Date());
         SocketAddress addr = ctx.channel().remoteAddress();
 //        Redis.getInstance().setRecord(sDate, getStrAddress(addr), iDate);
-        hHeartTime.put(addr, -10);
+//        hHeartTime.put(addr, -10);
     }
 
     void runHeartBeat(SocketAddress addr){
@@ -82,7 +84,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
             }
         };
         // 第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间
-        service.scheduleAtFixedRate(runnable, 30, 30, TimeUnit.SECONDS);
+        service.scheduleAtFixedRate(runnable, 60, 60, TimeUnit.SECONDS);
     }
 
     String getStrAddress(SocketAddress addr){
@@ -99,8 +101,8 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
         if (frame instanceof TextWebSocketFrame) {
             // Send the uppercase string back.
             String request = ((TextWebSocketFrame) frame).text();
-            if (request.length() == 0){
-                hHeartTime.put(ctx.channel().remoteAddress(), 0);
+            if (request.equals("0")){
+                ctx.channel().writeAndFlush(new TextWebSocketFrame("0"));
                 return;
             }
             System.out.println(getStrDate()+ctx.channel().remoteAddress()+"\t"+request);
@@ -167,4 +169,12 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
             throw new UnsupportedOperationException(message);
         }
     }
+
+//    @Override
+//    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+//        System.out.println("Channel heartBeat lost");
+//        if (evt instanceof IdleStateEvent && IdleState.READER_IDLE == ((IdleStateEvent) evt).state()) {
+//            ctx.close();
+//        }
+//    }
 }

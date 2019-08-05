@@ -32,6 +32,12 @@ export default class Level extends cc.Component {
     music: cc.AudioSource = null;
 
     @property(cc.Label)
+    labMeLines: cc.Label = null;
+
+    @property(cc.Label)
+    labOtherLines: cc.Label = null;
+
+    @property(cc.Label)
     labTime: cc.Label = null;
 
     @property({
@@ -75,11 +81,11 @@ export default class Level extends cc.Component {
         this.initEvent();
         this.initShow();
 
-        // cc.director.getCollisionManager().enabled = true;
-        let mgr = cc.director.getCollisionManager();
-        mgr.enabled = true;
-        mgr.enabledDebugDraw = true;
-        mgr.enabledDrawBoundingBox = true;
+        cc.director.getCollisionManager().enabled = true;
+        // let mgr = cc.director.getCollisionManager();
+        // mgr.enabled = true;
+        // mgr.enabledDebugDraw = true;
+        // mgr.enabledDrawBoundingBox = true;
 
         let time = 3;
         let self = this;
@@ -170,6 +176,7 @@ export default class Level extends cc.Component {
             nd2.parent = this.lines[0].parent;
             this.lines2.push(nd2);
         }
+        this.showPlayers();
     }
 
     onResponse(cmd, msg){
@@ -177,7 +184,7 @@ export default class Level extends cc.Component {
         if (cmd == GLB.LOSE){
             this.music.stop();
             this.playSound("win");
-            this.gameOver("赢了");
+            this.gameOver(1);
         }
     }
 
@@ -187,23 +194,10 @@ export default class Level extends cc.Component {
     }
 
     jump(){
-        // var self = this;
         this._bJump = true;
         this.music.stop();
-        // let anim = this.p1.getComponent(cc.Animation);
-        // var cb = cc.callFunc(()=>{
-        //     self._bJump = false;
-        //     self.music.play();
-        //     anim.play("run");
-        // })
-        // var seq = cc.sequence(cc.delayTime(1), cb);
-        // this.p1.runAction(seq);
-        // anim.play("jump");
         this.p1.getComponent(cc.Animation).play("jump");
-    }
-
-    showResult(str){
-        cc.find("lab", this.ndResult).getComponent(cc.Label).string = str;
+        this.showLines();
     }
 
     gameStart(){
@@ -222,11 +216,11 @@ export default class Level extends cc.Component {
         this.tOnRun = [];
     }
 
-    gameOver(str){
+    gameOver(iType){
         this._gameStatus = 2;
-        // this.ndResult.active = true;
-        // this.p1.active = false;
-        // this.showResult(str);
+        this.ndResult.active = true;
+        this.p1.active = false;
+        this.showResult(iType);
     }
 
     playSound(sName){
@@ -256,7 +250,69 @@ export default class Level extends cc.Component {
         let self = this;
         this.labTime.scheduleOnce(function (argument) {
             self.playSound("lose");
-            self.gameOver("输了");
+            self.gameOver(0);
         }, 1)
+    }
+
+    showPlayers(){
+        let top = cc.find("top", this.node);
+        if (GLB.userInfo && GLB.userInfo instanceof Object){
+            let me = top.getChildByName("me");
+            me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+            if (GLB.userInfo.avatarUrl){
+                cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    me.getChildByName("pic").getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+                });
+            }
+        }
+        if (GLB.otherInfo && GLB.otherInfo instanceof Object){
+            let other = top.getChildByName("other");
+            other.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.otherInfo.nickName);
+            if (GLB.otherInfo.avatarUrl){
+                cc.loader.load({ url: GLB.otherInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    other.getChildByName("pic").getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+                });
+            }
+        }
+    }
+
+    getStrName(s: string){
+        if (s && s.length > 5) s = s.substring(0, 5)+"...";
+        return s;
+    }
+
+    showResult(iType){
+        if (iType == 0) cc.find("lose", this.ndResult).active = true;
+        if (GLB.userInfo && GLB.userInfo instanceof Object){
+            let me = this.ndResult.getChildByName("me");
+            me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+            if (GLB.userInfo.avatarUrl){
+                cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+                });
+            }
+        }
+        if (GLB.otherInfo && GLB.otherInfo instanceof Object){
+            let other = this.ndResult.getChildByName("other");
+            other.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.otherInfo.nickName);
+            if (GLB.otherInfo.avatarUrl){
+                cc.loader.load({ url: GLB.otherInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    other.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+                });
+            }
+        }
+    }
+
+    showLines(){
+        let iLine = this._iTime-2;
+        for (let i = this._iTimeIdx-1; i >= 0; i--){
+            if (iLine > TTIME[i]){
+                iLine = i+1;
+                break;
+            }
+        }
+        if (iLine < 0) iLine = 0;
+        this.labMeLines.string = iLine.toString();
+        this.labOtherLines.string = iLine.toString();
     }
 }

@@ -25,6 +25,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 
+import io.netty.handler.timeout.IdleStateHandler;
+import java.util.concurrent.TimeUnit;
+
 /**
  */
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> {
@@ -50,5 +53,6 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
         pipeline.addLast(new WebSocketFrameHandler());
         pipeline.addLast(new HttpServerExpectContinueHandler());
         pipeline.addLast(new HttpServerHandler());
+//        pipeline.addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
     }
 }
