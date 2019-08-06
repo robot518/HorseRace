@@ -12,7 +12,7 @@ var WS = {
 var bError = false;
 var lockReconnect = false;
 var heartCheck = {
-    timeout: 20000,
+    timeout: 30000,
     timeoutObj: null,
     serverTimeoutObj: null,
     start: function(){
@@ -29,11 +29,11 @@ var heartCheck = {
         }, self.timeout);
       }, this.timeout)
     }
-  }
+}
 var creatWS = function () {
     ws = null;
-    // ws = new WebSocket("ws://47.111.184.119:8080/websocket");
-    ws = new WebSocket("ws://127.0.0.1:8080/websocket");
+    ws = new WebSocket("ws://47.111.184.119:8080/websocket");
+    // ws = new WebSocket("ws://127.0.0.1:8080/websocket");
     // if (CC_WECHATGAME || cc.sys.os === cc.sys.OS_IOS)
     //     ws = new WebSocket("wss://websocket.windgzs.cn/websocket"); //wx/ios
     // else if (cc.sys.os === cc.sys.OS_ANDROID)
@@ -83,8 +83,7 @@ WS.sendMsg = function (cmd: string, msg: string, obj) {
             WS.obj = obj;
         }
         return true;
-    }
-    else {
+    }else {
         console.log(GLB.getTime()+"WebSocket instance wasn't ready...");
         if (GLB.msgBox) GLB.msgBox.active = true;
         return false;
@@ -101,7 +100,7 @@ WS.reconnect = function () {
         bError = false;
         creatWS();
         lockReconnect = false;
-    }, 25000)
+    }, 4000)
 };
 creatWS();
 export {WS};

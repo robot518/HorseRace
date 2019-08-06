@@ -9,15 +9,9 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import sun.security.ssl.Debug;
 
-import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-import static io.netty.handler.codec.rtsp.RtspHeaderNames.CONTENT_LENGTH;
-import static io.netty.handler.codec.rtsp.RtspHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.rtsp.RtspResponseStatuses.BAD_REQUEST;
-import static javax.print.DocFlavor.READER.TEXT_PLAIN;
-import static javax.sound.sampled.LineEvent.Type.CLOSE;
-import static sun.tools.jconsole.Messages.CONNECTION;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 

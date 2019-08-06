@@ -4,17 +4,25 @@ import {GLB} from "./GLBConfig";
 import {WS} from "./Socket";
 
 let second = 2;
-let SPEED = 720/second;
-//srcvp(585,720) desvp(-355,-720)
-let SPEEDX = SPEED*(585+355)/(720+720);
-let TTIME = [0,1,3,4,6,7,8,9];
-let TLINES = [0,1,0,1,0,1,0,1];
+let src = cc.v2(585, 380);
+let des = cc.v2(-600, -530);
+let SPEED = (src.y+290)/second;
+let SPEEDX = SPEED*(src.x-des.x)/(src.y-des.y);
+// let TTIME = [0,1];
+// let TLINES = [0,1];
+// 21 36 59
+let TTIME = [1,3,5,9,10,11,12.8,14,15,15.9,16.8,21,23,24,24.9,25.7,27,29,30,31,36,38,39,40,43,48,49,49.8,50.8,52,53,54,55,55.8,59];
+let TLINES = [0,1,0,1,0,1,0,1,1,0,1,0,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,1,0,1,1,0,1,0,1,1,0,1,1,0];
+const COUNT = 6;
 
 @ccclass
 export default class Level extends cc.Component {
 
     @property(cc.Node)
     p1: cc.Node = null;
+
+    @property(cc.Node)
+    mouse: cc.Node = null;
 
     @property([cc.Node])
     lines: cc.Node[] = [];
@@ -65,11 +73,11 @@ export default class Level extends cc.Component {
     _iCount: number;
     _bJump: boolean;
     _iTime: number;
-    tTime: number[];
     _iTimeIdx: number;
-    tOnRun: any[];
+    tOnRun: cc.Node[];
     _iLineIdx: number;
     _iLineIdx2: number;
+    _iTurn: number; //几轮
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -107,16 +115,21 @@ export default class Level extends cc.Component {
     update (dt) {
         if (this._gameStatus == 1){
             this._iTime += dt;
-            if (this._iTime >= this.tTime[this._iTimeIdx]){
-                let line = TLINES[this._iTimeIdx];
-                if (line == 0){
-                    this.tOnRun.unshift(this.lines[this._iLineIdx]);
-                    this._iLineIdx++;
-                    if (this._iLineIdx >= 6) this._iLineIdx -= 6;
+            if (this._iTime >= TTIME[this._iTimeIdx]){
+                if (TTIME[this._iTimeIdx] == 21 || TTIME[this._iTimeIdx] == 36 || TTIME[this._iTimeIdx] == 59){
+                // if (TTIME[this._iTimeIdx] == 1 || TTIME[this._iTimeIdx] == 10 || TTIME[this._iTimeIdx] == 15){
+                    this.tOnRun.unshift(this.mouse);
                 }else{
-                    this.tOnRun.unshift(this.lines2[this._iLineIdx2]);
-                    this._iLineIdx2++;
-                    if (this._iLineIdx2 >= 6) this._iLineIdx2 -= 6;
+                    let line = TLINES[this._iTimeIdx];
+                    if (line == 0){
+                        this.tOnRun.unshift(this.lines[this._iLineIdx]);
+                        this._iLineIdx++;
+                        if (this._iLineIdx >= COUNT) this._iLineIdx -= COUNT;
+                    }else if (line == 1){
+                        this.tOnRun.unshift(this.lines2[this._iLineIdx2]);
+                        this._iLineIdx2++;
+                        if (this._iLineIdx2 >= COUNT) this._iLineIdx2 -= COUNT;
+                    }
                 }
                 this._iTimeIdx++;
             }
@@ -124,9 +137,9 @@ export default class Level extends cc.Component {
                 let nd = this.tOnRun[i];
                 nd.y -= this._speed*dt;
                 nd.x -= SPEEDX*dt;
-                if (nd.y < -720){
-                    nd.y = 720;
-                    nd.x = 585
+                if (nd.y < des.y){
+                    nd.y = src.y;
+                    nd.x = src.x
                     this.tOnRun.pop();
                 }
             }
@@ -168,7 +181,7 @@ export default class Level extends cc.Component {
 
     initShow(){
         this.labTime.node.parent.active = true;
-        for (let i = 0; i < 5; i++){
+        for (let i = 0; i < COUNT-1; i++){
             let nd = cc.instantiate(this.lines[0]);
             nd.parent = this.lines[0].parent;
             this.lines.push(nd);
@@ -191,13 +204,13 @@ export default class Level extends cc.Component {
     onJumpDown(){
         this._bJump = false;
         this.music.play();
+        this.showLines();
     }
 
     jump(){
         this._bJump = true;
         this.music.stop();
         this.p1.getComponent(cc.Animation).play("jump");
-        this.showLines();
     }
 
     gameStart(){
@@ -209,10 +222,10 @@ export default class Level extends cc.Component {
         this._bJump = false;
         this.music.play();
         this._iTime = 0;
-        this.tTime = TTIME;
         this._iTimeIdx = 0;
         this._iLineIdx = 0;
         this._iLineIdx2 = 0;
+        this._iTurn = 0;
         this.tOnRun = [];
     }
 
@@ -305,14 +318,22 @@ export default class Level extends cc.Component {
 
     showLines(){
         let iLine = this._iTime-2;
-        for (let i = this._iTimeIdx-1; i >= 0; i--){
+        let i = this._iTimeIdx-1;
+        for (; i >= 0; i--){
             if (iLine > TTIME[i]){
                 iLine = i+1;
                 break;
             }
         }
+        // console.log(this._iTime, this._iTimeIdx, iLine, this._iTurn);
         if (iLine < 0) iLine = 0;
+        else iLine += this._iTurn*TTIME.length;
         this.labMeLines.string = iLine.toString();
         this.labOtherLines.string = iLine.toString();
+        if (i == TTIME.length-1){
+            this._iTurn++;
+            this._iTimeIdx = 0;
+            this._iTime = 0;
+        }
     }
 }

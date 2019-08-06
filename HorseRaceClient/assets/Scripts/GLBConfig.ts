@@ -9,11 +9,10 @@ var GLB = {
     otherInfo: null,
 
     //event
-    REGISTER: "register",
-    LOGIN: "login",
+    // REGISTER: "register",
+    // LOGIN: "login",
     MATCH: "match",
     LOSE: "lose",
-    // START: "start",
 
     getTime(){
         let s = "[";

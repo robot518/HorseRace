@@ -19,17 +19,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 
 import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.List;
 
 /**
@@ -38,7 +33,6 @@ import java.util.List;
 public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
     private static long iCount = 0;
     static HashMap<SocketAddress, ChannelHandlerContext> hCtx = new HashMap<>();
-    static HashMap<SocketAddress, Integer> hHeartTime = new HashMap<>();
     static List<ChannelHandlerContext> lCtx = new ArrayList<>();
     static HashMap<ChannelHandlerContext, ChannelHandlerContext> mapCtx = new HashMap<>();
     long startTime = -1;
@@ -53,8 +47,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
         SocketAddress addr = ctx.channel().remoteAddress();
 //        Redis.getInstance().setRecord(sDate, getStrAddress(addr), -1);
         hCtx.put(addr, ctx);
-//        hHeartTime.put(addr, 0);
-//        runHeartBeat(addr);
+//        System.out.println("channelActive:"+getStrDate()+ctx.channel().remoteAddress()+"\t"+addr);
     }
 
     @Override
@@ -64,27 +57,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
         String sDate = new SimpleDateFormat("MMdd").format(new Date());
         SocketAddress addr = ctx.channel().remoteAddress();
 //        Redis.getInstance().setRecord(sDate, getStrAddress(addr), iDate);
-//        hHeartTime.put(addr, -10);
-    }
-
-    void runHeartBeat(SocketAddress addr){
-        ScheduledExecutorService service = Executors
-                .newSingleThreadScheduledExecutor();
-        Runnable runnable = new Runnable() {
-            public void run() {
-                // task to run goes here
-                int iTime = hHeartTime.get(addr);
-                if (iTime < -5){
-                    hHeartTime.remove(addr);
-                    ChannelHandlerContext ctx = hCtx.remove(addr);
-                    ctx.close();
-                    service.shutdown();
-                }
-                hHeartTime.put(addr, --iTime);
-            }
-        };
-        // 第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间
-        service.scheduleAtFixedRate(runnable, 60, 60, TimeUnit.SECONDS);
+//        System.out.println("channelInactive:"+getStrDate()+ctx.channel().remoteAddress()+"\t"+addr);
     }
 
     String getStrAddress(SocketAddress addr){
@@ -101,6 +74,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
         if (frame instanceof TextWebSocketFrame) {
             // Send the uppercase string back.
             String request = ((TextWebSocketFrame) frame).text();
+            // 心跳包
             if (request.equals("0")){
                 ctx.channel().writeAndFlush(new TextWebSocketFrame("0"));
                 return;
@@ -169,12 +143,4 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
             throw new UnsupportedOperationException(message);
         }
     }
-
-//    @Override
-//    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-//        System.out.println("Channel heartBeat lost");
-//        if (evt instanceof IdleStateEvent && IdleState.READER_IDLE == ((IdleStateEvent) evt).state()) {
-//            ctx.close();
-//        }
-//    }
 }

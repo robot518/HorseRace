@@ -60,15 +60,15 @@
       "y": [
         {
           "frame": 0,
-          "value": -430
+          "value": -290
         },
         {
           "frame": 0.375,
-          "value": -250
+          "value": -110
         },
         {
           "frame": 0.75,
-          "value": -430
+          "value": -290
         }
       ]
     }

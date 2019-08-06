@@ -105,14 +105,15 @@ export default class Lobby extends cc.Component {
 
     onResponse(cmd, msg){
         var args = msg.split("|");
-        if (cmd == GLB.REGISTER || cmd == GLB.LOGIN){
-            // if (msg == "200"){ //成功
-            //     this.ndRegister.active = false;
-            //     this.initGLBData();
-            //     WS.sendMsg(GLB.GET_SCORE, GLB.sName, this);
-            // } else
-            //     this.playTips(msg);
-        }else if (cmd == GLB.MATCH){
+        // if (cmd == GLB.REGISTER || cmd == GLB.LOGIN){
+        //     // if (msg == "200"){ //成功
+        //     //     this.ndRegister.active = false;
+        //     //     this.initGLBData();
+        //     //     WS.sendMsg(GLB.GET_SCORE, GLB.sName, this);
+        //     // } else
+        //     //     this.playTips(msg);
+        // }else 
+        if (cmd == GLB.MATCH){
             this.showMatchOther([]);
             cc.director.loadScene("Level", function (err, scene) {
                 var obj = scene.getChildByName("Canvas").getComponent("Level");
