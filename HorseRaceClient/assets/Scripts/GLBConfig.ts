@@ -1,7 +1,7 @@
 /* 存放全局变量 */
 var GLB = {
-    ip: "http://47.111.184.119",
-    // ip: "127.0.0.1",
+    // ip: "47.111.184.119:8080",
+    ip: "127.0.0.1:8080",
     isClickCd: false,
     msgBox: null,
     usrId: null,
@@ -9,8 +9,7 @@ var GLB = {
     otherInfo: null,
 
     //event
-    // REGISTER: "register",
-    // LOGIN: "login",
+    WXLOGIN: "wxLogin",
     MATCH: "match",
     LOSE: "lose",
 

@@ -32,30 +32,30 @@ import java.util.List;
  */
 public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
     private static long iCount = 0;
-    static HashMap<SocketAddress, ChannelHandlerContext> hCtx = new HashMap<>();
-    static List<ChannelHandlerContext> lCtx = new ArrayList<>();
-    static HashMap<ChannelHandlerContext, ChannelHandlerContext> mapCtx = new HashMap<>();
-    long startTime = -1;
+    static List<ChannelHandlerContext> lCtx = new ArrayList<>(); //存放所有参与匹配的进程
+    static HashMap<ChannelHandlerContext, ChannelHandlerContext> mapCtx = new HashMap<>(); //索引为A方，字段为与A对战的B方
+    static HashMap<ChannelHandlerContext, String> mapUserInfo = new HashMap<>(); //索引为玩家进程，字段为玩家信息
+//    long startTime = -1;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         iCount++;
-        if (startTime < 0) {
-            startTime = System.currentTimeMillis();
-        }
-        String sDate = new SimpleDateFormat("MMdd").format(new Date());
-        SocketAddress addr = ctx.channel().remoteAddress();
+//        if (startTime < 0) {
+//            startTime = System.currentTimeMillis();
+//        }
+//        String sDate = new SimpleDateFormat("MMdd").format(new Date());
+//        SocketAddress addr = ctx.channel().remoteAddress();
 //        Redis.getInstance().setRecord(sDate, getStrAddress(addr), -1);
-        hCtx.put(addr, ctx);
 //        System.out.println("channelActive:"+getStrDate()+ctx.channel().remoteAddress()+"\t"+addr);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         iCount--;
-        Long iDate = (System.currentTimeMillis() - startTime) / 1000;
-        String sDate = new SimpleDateFormat("MMdd").format(new Date());
-        SocketAddress addr = ctx.channel().remoteAddress();
+        mapUserInfo.remove(ctx);
+//        Long iDate = (System.currentTimeMillis() - startTime) / 1000;
+//        String sDate = new SimpleDateFormat("MMdd").format(new Date());
+//        SocketAddress addr = ctx.channel().remoteAddress();
 //        Redis.getInstance().setRecord(sDate, getStrAddress(addr), iDate);
 //        System.out.println("channelInactive:"+getStrDate()+ctx.channel().remoteAddress()+"\t"+addr);
     }
@@ -83,44 +83,24 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
             int iColon = request.indexOf(":");
             if (iColon == -1) return;
             String cmd = request.substring(0, iColon);
-            String sIdx = "";
-            String sName = "";
-            String sPass = "";
-            String sResponse = "200"; //请求成功
+//            String sName = "";
+//            String sResponse = "200"; //请求成功
             ChannelHandlerContext oCtx = null;
-            int i1 = request.indexOf("|", 1); //第一个"|"的位置；
-            if (i1 != -1)
-                sName = request.substring(iColon + 1, i1);
+//            int i1 = request.indexOf("|", 1); //第一个"|"的位置；
+//            if (i1 != -1)
+//                sName = request.substring(iColon + 1, i1);
             switch (cmd) {
-                case "Records":
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + "=" + Redis.getInstance().Records(request.substring(iColon+1), iCount)));
-                    break;
-                case "Users":
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + "=" + Redis.getInstance().Users()));
-                    break;
                 case "wxLogin":
-                    break;
-                case "register":
-                    sPass = request.substring(i1 + 1);
-                    boolean bSetName = Redis.getInstance().setName(sName, sPass);
-                    if (bSetName == false)
-                        sResponse = "名字已被注册";
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":" + sResponse));
-                    break;
-                case "login":
-                    sPass = request.substring(i1 + 1);
-                    String sPassTemp = Redis.getInstance().getName(sName);
-                    if (sPassTemp == null)
-                        sResponse = "用户名不存在";
-                    else if (sPassTemp.equals(sPass) == false)
-                        sResponse = "密码错误";
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":" + sResponse));
+//                    String nickName = request.substring(iColon + 1, i1);
+//                    String avatarUrl = request.substring(i1+1);
+                    String userInfo = request.substring(iColon + 1);
+                    mapUserInfo.put(ctx, userInfo);
                     break;
                 case "match":
                     if (lCtx.size() > 0){
                         oCtx = lCtx.remove(0);
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"));
-                        oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"));
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+mapUserInfo.get(oCtx)));
+                        oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+mapUserInfo.get(ctx)));
                         mapCtx.put(ctx, oCtx);
                         mapCtx.put(oCtx, ctx);
                     }else lCtx.add(ctx);

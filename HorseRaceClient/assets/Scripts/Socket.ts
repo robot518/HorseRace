@@ -32,8 +32,7 @@ var heartCheck = {
 }
 var creatWS = function () {
     ws = null;
-    ws = new WebSocket("ws://47.111.184.119:8080/websocket");
-    // ws = new WebSocket("ws://127.0.0.1:8080/websocket");
+    ws = new WebSocket("ws://"+GLB.ip+"/websocket");
     // if (CC_WECHATGAME || cc.sys.os === cc.sys.OS_IOS)
     //     ws = new WebSocket("wss://websocket.windgzs.cn/websocket"); //wx/ios
     // else if (cc.sys.os === cc.sys.OS_ANDROID)
@@ -42,9 +41,9 @@ var creatWS = function () {
     //     ws = new WebSocket("wss://websocket.windgzs.cn/websocket"); //本地
     WS.ws = ws;
     ws.onopen = function (event) {
-     console.log(GLB.getTime()+"Send Text WS was opened.");
-     if (GLB.msgBox) GLB.msgBox.active = false;
-     heartCheck.start();
+        console.log(GLB.getTime()+"Send Text WS was opened.");
+        if (GLB.msgBox) GLB.msgBox.active = false;
+        heartCheck.start();
     };
     ws.onmessage = function (event) {
         heartCheck.start();
@@ -59,8 +58,8 @@ var creatWS = function () {
         WS.obj.onResponse(cmd, sResponse);
     };
     ws.onerror = function (event) {
-     console.log(GLB.getTime()+"Send Text fired an error.", event);
-     bError = true;
+        console.log(GLB.getTime()+"Send Text fired an error.", event);
+        bError = true;
     };
     ws.onclose = function (e) {
         if (e.code && e.code.toString() != "1001" && GLB.msgBox) GLB.msgBox.active = true;

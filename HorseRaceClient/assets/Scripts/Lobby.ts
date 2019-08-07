@@ -33,6 +33,8 @@ export default class Lobby extends cc.Component {
         this.initEvent();
         this.initShow();
         this.initMsgBox();
+        this.onWxEvent("auth");
+        this.onWxEvent("login");
     }
 
     // update (dt) {}
@@ -55,7 +57,6 @@ export default class Lobby extends cc.Component {
     }
 
     initEvent(){
-        this.onWxEvent("auth");
         cc.find("share", this.node).on("click", function (argument) {
             this.playSound("click");
             this.onWxEvent("share");
@@ -114,7 +115,8 @@ export default class Lobby extends cc.Component {
         //     //     this.playTips(msg);
         // }else 
         if (cmd == GLB.MATCH){
-            this.showMatchOther([]);
+            let res = {"nickName": args[0], "avatarUrl": args[1]};
+            this.showMatchOther(res);
             cc.director.loadScene("Level", function (err, scene) {
                 var obj = scene.getChildByName("Canvas").getComponent("Level");
                 WS.obj = obj;
@@ -215,8 +217,10 @@ export default class Lobby extends cc.Component {
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {
-                                GLB.userInfo = res.userInfo;
                                 // console.log("Res = ", res);
+                                GLB.userInfo = res.userInfo;
+                                let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
+                                WS.sendMsg(GLB.WXLOGIN, str);
                                 self.onMatch();
                                 self.UserInfoButton.hide();
                             })
@@ -225,44 +229,45 @@ export default class Lobby extends cc.Component {
                                 success(res){
                                     // console.log("Res = ", res);
                                     GLB.userInfo = res.userInfo;
+                                    let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
+                                    WS.sendMsg(GLB.WXLOGIN, str);
                                 }
                             })
-                            // self.btnMatch.active = true;
                         }
                     }
                 })
                 break;
             case "login":
-                // wx.login({
-            //     success (res) {
-            //         if (res.code) {
-            //             //发起网络请求
-            //             console.log("code = ", res.code);
-            //             wx.request({
-            //                 url: 'http://127.0.0.1:8080',
-            //                 data: {
-            //                     code: res.code
-            //                 },
-            //                 success(response){
-            //                     console.log("success response = ", response);
-            //                     console.log("usrid = ", response.data);
-            //                     // cc.sys.localStorage.setItem("usrId", response.data);
-            //                     // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
-            //                 },
-            //                 fail(response){
-            //                     console.log("fail response = ", response);
-            //                 }
-            //             })
-            //         } else {
-            //             console.log('登录失败！' + res.errMsg)
-            //         }
-            //     }
-            // })
-            // wx.checkSession({
-            //     fail () {
-                    
-            //     }
-            // })
+                wx.login({
+                    success (res) {
+                        if (res.code) {
+                            //发起网络请求
+                            console.log("code = ", res.code);
+                            wx.request({
+                                url: 'http://'+GLB.ip,
+                                data: {
+                                    code: res.code
+                                },
+                                success(response){
+                                    console.log("success response = ", response);
+                                    console.log("usrid = ", response.data);
+                                    // cc.sys.localStorage.setItem("usrId", response.data);
+                                    // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
+                                },
+                                fail(response){
+                                    console.log("fail response = ", response);
+                                }
+                            })
+                        } else {
+                            console.log('登录失败！' + res.errMsg)
+                        }
+                    }
+                })
+                wx.checkSession({
+                    fail () {
+                        
+                    }
+                })
                 break;
         }
     }
