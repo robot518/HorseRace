@@ -51,8 +51,7 @@ var creatWS = function () {
         if (data == "0") return;
         console.log(GLB.getTime()+"response text msg = " + data);
         var i1 = data.indexOf(":");
-        if (i1 == -1) return;
-        if (WS.obj == null) return;
+        if (i1 == -1 || WS.obj == null) return;
         var cmd = data.substring(0, i1);
         var sResponse = data.substring(i1+1);
         WS.obj.onResponse(cmd, sResponse);

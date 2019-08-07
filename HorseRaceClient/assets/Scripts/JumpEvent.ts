@@ -17,7 +17,6 @@ export default class NewClass extends cc.Component {
     // update (dt) {}
 
     onJumpDown(){
-        this.node.getComponent(cc.Animation).play("run");
         this.ndLevel.getComponent("Level").onJumpDown();
     }
         

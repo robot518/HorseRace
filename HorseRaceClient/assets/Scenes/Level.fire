@@ -1114,6 +1114,12 @@
       },
       {
         "__uuid__": "7d227680-6e30-42e7-aca6-7c6a876d96c8"
+      },
+      {
+        "__uuid__": "a575638e-45ce-4364-bbe9-d25d9b53e344"
+      },
+      {
+        "__uuid__": "bc0cc8f3-faa1-4b65-a8ac-0fff3a14e52f"
       }
     ],
     "playOnLoad": false,
@@ -3782,8 +3788,8 @@
     "ndBtn": {
       "__id__": 29
     },
-    "music": {
-      "__id__": 5
+    "horse2": {
+      "__uuid__": "c5695c08-83a7-4bc4-a11a-0c852db4c48c"
     },
     "labMeLines": {
       "__id__": 42
@@ -3793,6 +3799,9 @@
     },
     "labTime": {
       "__id__": 57
+    },
+    "music": {
+      "__id__": 5
     },
     "audioClick": {
       "__uuid__": "5b1978d6-9bcc-44a3-bb0f-5f6327cb81ac"

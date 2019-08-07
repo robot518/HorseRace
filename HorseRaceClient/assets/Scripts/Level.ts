@@ -33,8 +33,8 @@ export default class Level extends cc.Component {
     @property(cc.Node)
     ndBtn: cc.Node = null;
 
-    @property(cc.AudioSource)
-    music: cc.AudioSource = null;
+    @property(cc.SpriteFrame)
+    horse2: cc.SpriteFrame = null;
 
     @property(cc.Label)
     labMeLines: cc.Label = null;
@@ -44,6 +44,9 @@ export default class Level extends cc.Component {
 
     @property(cc.Label)
     labTime: cc.Label = null;
+
+    @property(cc.AudioSource)
+    music: cc.AudioSource = null;
 
     @property({
         type: cc.AudioClip
@@ -75,6 +78,7 @@ export default class Level extends cc.Component {
     _iLineIdx: number;
     _iLineIdx2: number;
     _iTurn: number; //几轮
+    _iRand: number;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -187,6 +191,8 @@ export default class Level extends cc.Component {
             this.lines2.push(nd2);
         }
         this.showPlayers();
+        this._iRand = Math.random();
+        if (this._iRand > 0.5) this.p1.getComponent(cc.Sprite).spriteFrame = this.horse2;
     }
 
     onResponse(cmd, msg){
@@ -199,6 +205,9 @@ export default class Level extends cc.Component {
     }
 
     onJumpDown(){
+        let anim = this.p1.getComponent(cc.Animation);
+        if (this._iRand > 0.5) anim.play("run2");
+        else anim.play();
         this._bJump = false;
         this.music.play();
         this.showLines();
@@ -207,12 +216,15 @@ export default class Level extends cc.Component {
     jump(){
         this._bJump = true;
         this.music.stop();
-        this.p1.getComponent(cc.Animation).play("jump");
+        let anim = this.p1.getComponent(cc.Animation);
+        if (this._iRand > 0.5) anim.play("jump2");
+        else anim.play("jump");
     }
 
     gameStart(){
-        var anim1 = this.p1.getComponent(cc.Animation);
-        anim1.play();
+        let anim = this.p1.getComponent(cc.Animation);
+        if (this._iRand > 0.5) anim.play("run2");
+        else anim.play();
         this._speed = SPEED;
         this._gameStatus = 1;
         this._iCount = 0;
