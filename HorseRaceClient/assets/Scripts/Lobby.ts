@@ -117,9 +117,14 @@ export default class Lobby extends cc.Component {
         if (cmd == GLB.MATCH){
             let res = {"nickName": args[0], "avatarUrl": args[1]};
             this.showMatchOther(res);
-            cc.director.loadScene("Level", function (err, scene) {
-                var obj = scene.getChildByName("Canvas").getComponent("Level");
-                WS.obj = obj;
+            cc.loader.downloader.loadSubpackage('subAtlas', function (err) {
+                if (err) {
+                    return console.error(err);
+                }
+                cc.director.loadScene("Level", function (err, scene) {
+                    var obj = scene.getChildByName("Canvas").getComponent("Level");
+                    WS.obj = obj;
+                });
             });
         }
     }
