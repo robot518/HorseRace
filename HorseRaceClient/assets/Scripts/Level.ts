@@ -300,7 +300,7 @@ export default class Level extends cc.Component {
 
     getStrName(s: string){
         if (s && s.length > 5) s = s.substring(0, 5)+"...";
-        return s;
+        return s || "";
     }
 
     showResult(iType){
@@ -336,7 +336,7 @@ export default class Level extends cc.Component {
         }
         // console.log(this._iTime, this._iTimeIdx, iLine, this._iTurn);
         if (iLine < 0) iLine = 0;
-        else iLine += this._iTurn*TTIME.length;
+        else iLine = this._iTurn*TTIME.length+Math.floor(iLine);
         this.labMeLines.string = iLine.toString();
         this.labOtherLines.string = iLine.toString();
         if (i == TTIME.length-1){

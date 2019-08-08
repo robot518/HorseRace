@@ -99,8 +99,12 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
                 case "match":
                     if (lCtx.size() > 0){
                         oCtx = lCtx.remove(0);
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+mapUserInfo.get(oCtx)));
-                        oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+mapUserInfo.get(ctx)));
+                        String other = mapUserInfo.get(oCtx);
+                        if (other == null) other = "";
+                        String me = mapUserInfo.get(ctx);
+                        if (me == null) me = "";
+                        ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+other));
+                        oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+me));
                         mapCtx.put(ctx, oCtx);
                         mapCtx.put(oCtx, ctx);
                     }else lCtx.add(ctx);
@@ -122,5 +126,12 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
             String message = "unsupported frame type: " + frame.getClass().getName();
             throw new UnsupportedOperationException(message);
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+//        cause.printStackTrace();
+        System.out.println(getStrDate()+ctx.channel().remoteAddress()+"\t"+cause);
+        ctx.close();
     }
 }
