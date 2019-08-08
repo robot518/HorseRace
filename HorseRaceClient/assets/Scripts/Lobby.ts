@@ -10,6 +10,9 @@ export default class Lobby extends cc.Component {
     ndMatch: cc.Node = null;
 
     @property(cc.Node)
+    ndShop: cc.Node = null;
+
+    @property(cc.Node)
     btnMatch: cc.Node = null;
 
     @property({
@@ -67,6 +70,12 @@ export default class Lobby extends cc.Component {
             //     var obj = scene.getChildByName("Canvas").getComponent("Level");
             //     WS.obj = obj;
             // });
+        }, this);
+        cc.find("btnShop", this.node).on("click", function (argument) {
+            this.ndShop.active = true;
+        }, this);
+        cc.find("ndShop", this.node).on("click", function (params) {
+            this.ndShop.active = false;
         }, this);
         // this.onWxEvent("initBanner");
         // this.onWxEvent("initVideo");
