@@ -53,6 +53,8 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         iCount--;
         mapUserInfo.remove(ctx);
+        lCtx.remove(ctx);
+        mapCtx.remove(ctx);
 //        Long iDate = (System.currentTimeMillis() - startTime) / 1000;
 //        String sDate = new SimpleDateFormat("MMdd").format(new Date());
 //        SocketAddress addr = ctx.channel().remoteAddress();
@@ -97,6 +99,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
                     mapUserInfo.put(ctx, userInfo);
                     break;
                 case "match":
+//                    String OpenID = request.substring(iColon + 1);
                     if (lCtx.size() > 0){
                         oCtx = lCtx.remove(0);
                         String other = mapUserInfo.get(oCtx);

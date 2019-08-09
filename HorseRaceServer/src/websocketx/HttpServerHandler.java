@@ -36,12 +36,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
                 if (iSession_key == -1) return;
                 int iOpenid = data.indexOf(s2);
                 String openid = data.substring(iOpenid+s2.length()+3, data.length()-2);
-                String usrId = data.substring(iSession_key+s1.length()+3, iSession_key+s1.length()+8)+openid.substring(0, 5);
-                Debug.println(openid, usrId);
+//                String usrId = data.substring(iSession_key+s1.length()+3, iSession_key+s1.length()+8)+openid.substring(0, 5);
+//                Debug.println(openid, usrId);
 
                 boolean keepAlive = HttpUtil.isKeepAlive(req);
                 FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, msg.decoderResult().isSuccess()? OK : BAD_REQUEST,
-                        Unpooled.copiedBuffer(usrId, CharsetUtil.UTF_8));
+                        Unpooled.copiedBuffer(openid, CharsetUtil.UTF_8));
                 response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
                 if (keepAlive) {

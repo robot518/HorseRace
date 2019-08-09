@@ -7,6 +7,7 @@ var GLB = {
     usrId: null,
     userInfo: null,
     otherInfo: null,
+    OpenID: "",
 
     //event
     WXLOGIN: "wxLogin",

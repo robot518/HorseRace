@@ -241,9 +241,10 @@ export default class Lobby extends cc.Component {
                                 // console.log("Res = ", res);
                                 GLB.userInfo = res.userInfo;
                                 let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
-                                WS.sendMsg(GLB.WXLOGIN, str);
-                                self.onMatch();
-                                self.UserInfoButton.hide();
+                                if (WS.sendMsg(GLB.WXLOGIN, str)){
+                                    self.onMatch();
+                                    self.UserInfoButton.hide();
+                                }
                             })
                         }else{
                             wx.getUserInfo({
@@ -271,7 +272,8 @@ export default class Lobby extends cc.Component {
                                 },
                                 success(response){
                                     console.log("success response = ", response);
-                                    console.log("usrid = ", response.data);
+                                    console.log("OpenID = ", response.data);
+                                    GLB.OpenID = response.data;
                                     // cc.sys.localStorage.setItem("usrId", response.data);
                                     // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
                                 },
@@ -284,11 +286,11 @@ export default class Lobby extends cc.Component {
                         }
                     }
                 })
-                wx.checkSession({
-                    fail () {
+                // wx.checkSession({
+                //     fail () {
                         
-                    }
-                })
+                //     }
+                // })
                 break;
         }
     }
@@ -298,7 +300,7 @@ export default class Lobby extends cc.Component {
     }
 
     onMatch(){
-        if (WS.sendMsg(GLB.MATCH, "", this)){
+        if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this)){
             this.ndMatch.active = true;
             if (GLB.userInfo){
                 let me = this.ndMatch.getChildByName("me");
