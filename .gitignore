@@ -3,7 +3,6 @@
 [Bb]uild/
 [Ll]ocal/
 *.DS_Store
-*.meta
 *.keystore
 *.jar
 *.manifest
