@@ -79,13 +79,13 @@ export default class Lobby extends cc.Component {
         }, this);
         // this.onWxEvent("initBanner");
         // this.onWxEvent("initVideo");
-        // if (CC_WECHATGAME && cc.sys.os === cc.sys.OS_ANDROID){
-        //     var self = this;
-        //     wx.onShow(()=>{
-        //         // console.log("self.music.isPlaying = " + (self.music && self.music.isPlaying));
-        //         if (self.music) self.music.play();
-        //     });
-        // }
+        if (CC_WECHATGAME){
+            let invite = cc.find("invite", this.ndMatch);
+            invite.active = true;
+            invite.on("click", function (params) {
+                this.onWxEvent("invite");
+            }, this);
+        }
     }
 
     initShow(){
@@ -189,6 +189,22 @@ export default class Lobby extends cc.Component {
                 // this._videoAd.onError(err => {
                 //   console.log(err)
                 // });
+                break;
+            case "invite":
+                wx.updateShareMenu({
+                    withShareTicket: true,
+                    isUpdatableMessage: true,
+                    activityId: '', // 活动 ID
+                    templateInfo: {
+                      parameterList: [{
+                        name: 'member_count',
+                        value: '1'
+                      }, {
+                        name: 'room_limit',
+                        value: '3'
+                      }]
+                    }
+                })
                 break;
             case "share":
                 // var id = '' // 通过 MP 系统审核的图片编号
