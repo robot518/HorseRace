@@ -32,8 +32,8 @@ var heartCheck = {
 }
 var creatWS = function () {
     ws = null;
-    ws = new WebSocket("ws://"+GLB.ip+"/websocket");
-    // ws = new WebSocket("wss://websocket.windgzs.cn/websocket"); //wx/ios
+    // ws = new WebSocket("ws://"+GLB.ip+"/websocket");
+    ws = new WebSocket("wss://websocket.windgzs.cn/websocket"); //wx
     WS.ws = ws;
     ws.onopen = function (event) {
         console.log(GLB.getTime()+"Send Text WS was opened.");

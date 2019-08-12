@@ -36,8 +36,9 @@ export default class Lobby extends cc.Component {
         this.initEvent();
         this.initShow();
         this.initMsgBox();
-        this.onWxEvent("auth");
         this.onWxEvent("login");
+        // this.onWxEvent("auth");
+        this.onWxEvent("onShow");
     }
 
     // update (dt) {}
@@ -191,20 +192,19 @@ export default class Lobby extends cc.Component {
                 // });
                 break;
             case "invite":
-                wx.updateShareMenu({
-                    withShareTicket: true,
-                    isUpdatableMessage: true,
-                    activityId: '', // 活动 ID
-                    templateInfo: {
-                      parameterList: [{
-                        name: 'member_count',
-                        value: '1'
-                      }, {
-                        name: 'room_limit',
-                        value: '3'
-                      }]
-                    }
-                })
+                wx.shareAppMessage({
+                    title: "邀请对战！",
+                    imageUrl: canvas.toTempFilePathSync({
+                        destWidth: 500,
+                        destHeight: 400
+                    }),
+                    query: "OpenID=123&userInfo=GLB.userInfo",
+                });
+                break;
+            case "onShow":
+                wx.onShow(function (res) {
+                    console.log("res.query=", res.query);
+                });
                 break;
             case "share":
                 // var id = '' // 通过 MP 系统审核的图片编号
@@ -245,7 +245,7 @@ export default class Lobby extends cc.Component {
                             self.UserInfoButton = wx.createUserInfoButton({
                                 type: 'text',
                                 text: '',
-                                // withCredentials: false,
+                                withCredentials: true,
                                 style: {
                                     left: size.width/2-width/2,
                                     top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
@@ -256,6 +256,7 @@ export default class Lobby extends cc.Component {
                             self.UserInfoButton.onTap((res) => {
                                 // console.log("Res = ", res);
                                 GLB.userInfo = res.userInfo;
+                                // let str = GLB.OpenID+"|"+res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
                                 let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
                                 if (WS.sendMsg(GLB.WXLOGIN, str)){
                                     self.onMatch();
@@ -264,6 +265,7 @@ export default class Lobby extends cc.Component {
                             })
                         }else{
                             wx.getUserInfo({
+                                withCredentials: true,
                                 success(res){
                                     // console.log("Res = ", res);
                                     GLB.userInfo = res.userInfo;
@@ -276,34 +278,45 @@ export default class Lobby extends cc.Component {
                 })
                 break;
             case "login":
-                wx.login({
-                    success (res) {
-                        if (res.code) {
-                            //发起网络请求
-                            console.log("code = ", res.code);
-                            wx.request({
-                                url: 'http://'+GLB.ip,
-                                data: {
-                                    code: res.code
-                                },
-                                success(response){
-                                    console.log("success response = ", response);
-                                    console.log("OpenID = ", response.data);
-                                    GLB.OpenID = response.data;
-                                    // cc.sys.localStorage.setItem("usrId", response.data);
-                                    // GLB.usrId = cc.sys.localStorage.getItem("usrId") || null;
-                                },
-                                fail(response){
-                                    console.log("fail response = ", response);
-                                }
-                            })
-                        } else {
-                            console.log('登录失败！' + res.errMsg)
+                GLB.OpenID = cc.sys.localStorage.getItem("OpenID");
+                console.log("OpenID2 = ", GLB.OpenID);
+                if (GLB.OpenID){
+                    if (!GLB.userInfo) this.onWxEvent("auth");
+                }else {
+                    wx.login({
+                        success (res) {
+                            if (res.code) {
+                                //发起网络请求
+                                // console.log("code = ", res.code);
+                                wx.request({
+                                    url: 'http://'+GLB.ip,
+                                    data: {
+                                        code: res.code
+                                    },
+                                    success(response){
+                                        // console.log("success response = ", response);
+                                        console.log("OpenID = ", response.data);
+                                        GLB.OpenID = response.data;
+                                        cc.sys.localStorage.setItem("OpenID", response.data);
+                                        self.onWxEvent("auth");
+                                    },
+                                    fail(response){
+                                        console.log("fail response = ", response);
+                                    }
+                                })
+                            } else {
+                                console.log('登录失败！' + res.errMsg)
+                            }
                         }
-                    }
-                })
-                // wx.checkSession({
+                    })
+                }
+                // wx.checkSession({ //用于检测SessionKey是否过期
+                //     success () {
+                //         //session_key 未过期，并且在本生命周期一直有效
+                //         if (!GLB.userInfo) this.onWxEvent("auth");
+                //     },
                 //     fail () {
+                //         // session_key 已经失效，需要重新执行登录流程
                         
                 //     }
                 // })
