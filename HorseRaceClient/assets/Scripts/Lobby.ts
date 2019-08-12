@@ -245,7 +245,7 @@ export default class Lobby extends cc.Component {
                             self.UserInfoButton = wx.createUserInfoButton({
                                 type: 'text',
                                 text: '',
-                                withCredentials: true,
+                                withCredentials: GLB.withCredentials,
                                 style: {
                                     left: size.width/2-width/2,
                                     top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
@@ -254,18 +254,20 @@ export default class Lobby extends cc.Component {
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {
-                                // console.log("Res = ", res);
-                                GLB.userInfo = res.userInfo;
-                                // let str = GLB.OpenID+"|"+res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
-                                let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
-                                if (WS.sendMsg(GLB.WXLOGIN, str)){
-                                    self.onMatch();
-                                    self.UserInfoButton.hide();
+                                console.log("Res = ", res);
+                                if (res.userInfo){
+                                    GLB.userInfo = res.userInfo;
+                                    // let str = GLB.OpenID+"|"+res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
+                                    let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
+                                    if (WS.sendMsg(GLB.WXLOGIN, str)){
+                                        self.onMatch();
+                                        self.UserInfoButton.hide();
+                                    }
                                 }
                             })
                         }else{
                             wx.getUserInfo({
-                                withCredentials: true,
+                                withCredentials: GLB.withCredentials,
                                 success(res){
                                     // console.log("Res = ", res);
                                     GLB.userInfo = res.userInfo;
@@ -278,7 +280,8 @@ export default class Lobby extends cc.Component {
                 })
                 break;
             case "login":
-                GLB.OpenID = cc.sys.localStorage.getItem("OpenID");
+                cc.sys.localStorage.setItem("OpenID", null);
+                // GLB.OpenID = cc.sys.localStorage.getItem("OpenID");
                 console.log("OpenID2 = ", GLB.OpenID);
                 if (GLB.OpenID){
                     if (!GLB.userInfo) this.onWxEvent("auth");
@@ -289,7 +292,8 @@ export default class Lobby extends cc.Component {
                                 //发起网络请求
                                 // console.log("code = ", res.code);
                                 wx.request({
-                                    url: 'http://'+GLB.ip,
+                                    // url: 'http://'+GLB.ip,
+                                    url: "https://websocket.windgzs.cn/HorseRace/",
                                     data: {
                                         code: res.code
                                     },

@@ -32,8 +32,9 @@ var heartCheck = {
 }
 var creatWS = function () {
     ws = null;
-    // ws = new WebSocket("ws://"+GLB.ip+"/websocket");
-    ws = new WebSocket("wss://websocket.windgzs.cn/websocket"); //wx
+    if (CC_WECHATGAME)
+        ws = new WebSocket("wss://HorseRace.windgzs.cn/websocket"); //wx
+    else ws = new WebSocket("ws://"+GLB.ip+"/websocket");
     WS.ws = ws;
     ws.onopen = function (event) {
         console.log(GLB.getTime()+"Send Text WS was opened.");
@@ -44,7 +45,7 @@ var creatWS = function () {
         heartCheck.start();
         var data = event.data;
         if (data == "0") return;
-        console.log(GLB.getTime()+"response text msg = " + data);
+        // console.log(GLB.getTime()+"response text msg = " + data);
         var i1 = data.indexOf(":");
         if (i1 == -1 || WS.obj == null) return;
         var cmd = data.substring(0, i1);
@@ -70,7 +71,7 @@ WS.sendMsg = function (cmd: string, msg: string, obj) {
         }
         msg = msg || "";
         var str = cmd + ":" + msg.toString();
-        console.log(GLB.getTime()+"sendMsg = ", str);
+        // console.log(GLB.getTime()+"sendMsg = ", str);
         ws.send(str);
         if (obj != null){
             WS.obj = obj;
