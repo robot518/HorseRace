@@ -15,6 +15,18 @@ export default class Lobby extends cc.Component {
     @property(cc.Node)
     btnMatch: cc.Node = null;
 
+    @property(cc.Sprite)
+    sptHorse: cc.Sprite = null;
+
+    @property(cc.Sprite)
+    sptName: cc.Sprite = null;
+
+    @property(cc.SpriteFrame)
+    tHorsePic: cc.SpriteFrame[] = [];
+
+    @property(cc.SpriteFrame)
+    tHorseName: cc.SpriteFrame[] = [];
+
     @property({
         type: cc.AudioClip
     })
@@ -25,6 +37,7 @@ export default class Lobby extends cc.Component {
     _bannerAd: any;
     _bLoaded: boolean;
     UserInfoButton: any;
+    _iHorse: number = 0;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -66,6 +79,8 @@ export default class Lobby extends cc.Component {
             this.onWxEvent("share");
         }, this);
         this.btnMatch.on("click", function (argument) {
+            this.playSound("click");
+            // GLB.iHorse = null;
             this.onMatch();
             // cc.director.loadScene("Level", function (err, scene) {
             //     var obj = scene.getChildByName("Canvas").getComponent("Level");
@@ -73,10 +88,37 @@ export default class Lobby extends cc.Component {
             // });
         }, this);
         cc.find("btnShop", this.node).on("click", function (argument) {
+            this.playSound("click");
             this.ndShop.active = true;
         }, this);
-        cc.find("ndShop", this.node).on("click", function (params) {
+        this.ndShop.on("click", function (params) {
+            this.playSound("click");
             this.ndShop.active = false;
+        }, this);
+        let shopBg = cc.find("bg", this.ndShop);
+        cc.find("btn", shopBg).on("click", function (params) {
+            this.playSound("click");
+            if (this._iHorse == 0 || this._iHorse == 4){
+                GLB.iHorse = this._iHorse;
+                this.ndShop.active = false;
+                this.onMatch();
+            }
+            // cc.director.loadScene("Level", function (err, scene) {
+            //     var obj = scene.getChildByName("Canvas").getComponent("Level");
+            //     WS.obj = obj;
+            // });
+        }, this);
+        cc.find("right", shopBg).on("click", function (params) {
+            this.playSound("click");
+            this._iHorse++;
+            if (this._iHorse > 4) this._iHorse = 0;
+            this.showHorse();
+        }, this);
+        cc.find("left", shopBg).on("click", function (params) {
+            this.playSound("click");
+            this._iHorse--;
+            if (this._iHorse < 0) this._iHorse = 4;
+            this.showHorse();
         }, this);
         // this.onWxEvent("initBanner");
         // this.onWxEvent("initVideo");
@@ -234,33 +276,38 @@ export default class Lobby extends cc.Component {
                 wx.getSetting({
                     success(res) {
                         if (!res.authSetting['scope.userInfo']) {
-                            let size = cc.view.getFrameSize();
+                            // let size = cc.view.getFrameSize();
                             let dSize = self.node.getComponent(cc.Canvas).designResolution;
-                            let pix = 1;
-                            if (size.width/size.height >= dSize.width/dSize.height){
-                                pix = dSize.height/size.height;
-                            }else pix = dSize.width/size.width;
-                            let width = self.btnMatch.width/pix, height = self.btnMatch.height/pix;
+                            // let pix = 1;
+                            // if (size.width/size.height >= dSize.width/dSize.height){
+                            //     pix = dSize.height/size.height;
+                            // }else pix = dSize.width/size.width;
+                            // let width = self.btnMatch.width/pix, height = self.btnMatch.height/pix;
                             // console.log(size, width, height, pix);
                             self.UserInfoButton = wx.createUserInfoButton({
                                 type: 'text',
                                 text: '',
                                 withCredentials: GLB.withCredentials,
                                 style: {
-                                    left: size.width/2-width/2,
-                                    top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
-                                    width: width,
-                                    height: height,
+                                    // left: size.width/2-width/2,
+                                    // top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
+                                    // width: width,
+                                    // height: height,
+                                    left: 0,
+                                    top: 0,
+                                    width: dSize.width,
+                                    height: dSize.height,
+                                    // backgroundColor: '#ff0000',
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {
-                                console.log("Res = ", res);
+                                // console.log("Res = ", res);
                                 if (res.userInfo){
                                     GLB.userInfo = res.userInfo;
                                     // let str = GLB.OpenID+"|"+res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
                                     let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
                                     if (WS.sendMsg(GLB.WXLOGIN, str)){
-                                        self.onMatch();
+                                        // self.onMatch();
                                         self.UserInfoButton.hide();
                                     }
                                 }
@@ -280,9 +327,9 @@ export default class Lobby extends cc.Component {
                 })
                 break;
             case "login":
-                cc.sys.localStorage.setItem("OpenID", null);
-                // GLB.OpenID = cc.sys.localStorage.getItem("OpenID");
-                console.log("OpenID2 = ", GLB.OpenID);
+                // cc.sys.localStorage.setItem("OpenID", null);
+                GLB.OpenID = cc.sys.localStorage.getItem("OpenID");
+                // console.log("OpenID2 = ", GLB.OpenID);
                 if (GLB.OpenID){
                     if (!GLB.userInfo) this.onWxEvent("auth");
                 }else {
@@ -299,7 +346,7 @@ export default class Lobby extends cc.Component {
                                     },
                                     success(response){
                                         // console.log("success response = ", response);
-                                        console.log("OpenID = ", response.data);
+                                        // console.log("OpenID = ", response.data);
                                         GLB.OpenID = response.data;
                                         cc.sys.localStorage.setItem("OpenID", response.data);
                                         self.onWxEvent("auth");
@@ -361,5 +408,10 @@ export default class Lobby extends cc.Component {
     getStrName(s: string){
         if (s && s.length > 5) s = s.substring(0, 5)+"...";
         return s || "";
+    }
+
+    showHorse(){
+        this.sptHorse.spriteFrame = this.tHorsePic[this._iHorse];
+        this.sptName.spriteFrame = this.tHorseName[this._iHorse];
     }
 }

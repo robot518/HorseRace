@@ -45,6 +45,9 @@ export default class Level extends cc.Component {
     @property(cc.Label)
     labTime: cc.Label = null;
 
+    @property(cc.SpriteFrame)
+    tHorsePlayers: cc.SpriteFrame[] = [];
+
     @property(cc.AudioSource)
     music: cc.AudioSource = null;
 
@@ -191,8 +194,13 @@ export default class Level extends cc.Component {
             this.lines2.push(nd2);
         }
         this.showPlayers();
-        this._iRand = Math.random();
-        if (this._iRand > 0.5) this.p1.getComponent(cc.Sprite).spriteFrame = this.horse2;
+        if (GLB.iHorse != null){
+            this.p1.getComponent(cc.Sprite).spriteFrame = this.tHorsePlayers[GLB.iHorse];
+        }else{
+            // this._iRand = Math.random();
+            this._iRand = 0;
+            if (this._iRand > 0.5) this.p1.getComponent(cc.Sprite).spriteFrame = this.horse2;
+        }
     }
 
     onResponse(cmd, msg){
@@ -206,7 +214,9 @@ export default class Level extends cc.Component {
 
     onJumpDown(){
         let anim = this.p1.getComponent(cc.Animation);
-        if (this._iRand > 0.5) anim.play("run2");
+        if (GLB.iHorse != null){
+            anim.play("run_"+GLB.iHorse);
+        }else if (this._iRand > 0.5) anim.play("run2");
         else anim.play();
         this._bJump = false;
         this.music.play();
@@ -217,13 +227,17 @@ export default class Level extends cc.Component {
         this._bJump = true;
         this.music.stop();
         let anim = this.p1.getComponent(cc.Animation);
-        if (this._iRand > 0.5) anim.play("jump2");
+        if (GLB.iHorse != null){
+            anim.play("jump_"+GLB.iHorse);
+        }else if (this._iRand > 0.5) anim.play("jump2");
         else anim.play("jump");
     }
 
     gameStart(){
         let anim = this.p1.getComponent(cc.Animation);
-        if (this._iRand > 0.5) anim.play("run2");
+        if (GLB.iHorse != null){
+            anim.play("run_"+GLB.iHorse);
+        }else if (this._iRand > 0.5) anim.play("run2");
         else anim.play();
         this._speed = SPEED;
         this._gameStatus = 1;

@@ -8,6 +8,7 @@ var GLB = {
     otherInfo: null,
     OpenID: "",
     withCredentials: false,
+    iHorse: null, //第几种马
 
     //event
     WXLOGIN: "wxLogin",

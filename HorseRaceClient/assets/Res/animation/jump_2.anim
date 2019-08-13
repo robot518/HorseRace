@@ -1,0 +1,83 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "jump_2",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.875,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "87f0174d-62b5-4686-9f9d-0bde34c01a65"
+            }
+          },
+          {
+            "frame": 0.125,
+            "value": {
+              "__uuid__": "750a50b0-ab7f-4b9f-a884-984a6055c971"
+            }
+          },
+          {
+            "frame": 0.25,
+            "value": {
+              "__uuid__": "54bcb02d-43de-48a1-ace0-349bd5ba9be5"
+            }
+          },
+          {
+            "frame": 0.375,
+            "value": {
+              "__uuid__": "43cc885c-1ed8-46a7-a511-f1b155553a08"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "46486098-4949-4ffd-b63d-7d72b5b28fa0"
+            }
+          },
+          {
+            "frame": 0.625,
+            "value": {
+              "__uuid__": "51d9813d-f21d-4f83-956f-0d5f81307e5d"
+            }
+          },
+          {
+            "frame": 0.75,
+            "value": {
+              "__uuid__": "4de64d24-1b11-42af-b221-69d7ff13ebbf"
+            }
+          }
+        ]
+      }
+    },
+    "props": {
+      "y": [
+        {
+          "frame": 0,
+          "value": -290
+        },
+        {
+          "frame": 0.375,
+          "value": -110
+        },
+        {
+          "frame": 0.75,
+          "value": -290
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "frame": 0.75,
+      "func": "onJumpDown",
+      "params": []
+    }
+  ]
+}

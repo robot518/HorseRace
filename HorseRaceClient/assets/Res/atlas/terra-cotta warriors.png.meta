@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.1",
+  "uuid": "3fd65e2a-0e2f-4679-a011-d7aa7a620884",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "terra-cotta warriors": {
+      "ver": "1.0.4",
+      "uuid": "298cc1ab-3224-431f-95f7-f276e2ae2c0e",
+      "rawTextureUuid": "3fd65e2a-0e2f-4679-a011-d7aa7a620884",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 17,
+      "offsetY": -1,
+      "trimX": 43,
+      "trimY": 18,
+      "width": 263,
+      "height": 267,
+      "rawWidth": 315,
+      "rawHeight": 301,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
