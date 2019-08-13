@@ -106,6 +106,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
                         if (other == null) other = "";
                         String me = mapUserInfo.get(ctx);
                         if (me == null) me = "";
+                        System.out.println(getStrDate()+ctx.channel().remoteAddress()+"\t"+"me="+me+"\t"+"other="+other);
                         ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+other));
                         oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+me));
                         mapCtx.put(ctx, oCtx);
