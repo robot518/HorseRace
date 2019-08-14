@@ -33,9 +33,6 @@ export default class Level extends cc.Component {
     @property(cc.Node)
     ndBtn: cc.Node = null;
 
-    @property(cc.SpriteFrame)
-    horse2: cc.SpriteFrame = null;
-
     @property(cc.Label)
     labMeLines: cc.Label = null;
 
@@ -81,7 +78,6 @@ export default class Level extends cc.Component {
     _iLineIdx: number;
     _iLineIdx2: number;
     _iTurn: number; //几轮
-    _iRand: number;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -196,10 +192,6 @@ export default class Level extends cc.Component {
         this.showPlayers();
         if (GLB.iHorse != null){
             this.p1.getComponent(cc.Sprite).spriteFrame = this.tHorsePlayers[GLB.iHorse];
-        }else{
-            // this._iRand = Math.random();
-            this._iRand = 0;
-            if (this._iRand > 0.5) this.p1.getComponent(cc.Sprite).spriteFrame = this.horse2;
         }
     }
 
@@ -216,8 +208,7 @@ export default class Level extends cc.Component {
         let anim = this.p1.getComponent(cc.Animation);
         if (GLB.iHorse != null){
             anim.play("run_"+GLB.iHorse);
-        }else if (this._iRand > 0.5) anim.play("run2");
-        else anim.play();
+        }else anim.play();
         this._bJump = false;
         this.music.play();
         this.showLines();
@@ -229,16 +220,14 @@ export default class Level extends cc.Component {
         let anim = this.p1.getComponent(cc.Animation);
         if (GLB.iHorse != null){
             anim.play("jump_"+GLB.iHorse);
-        }else if (this._iRand > 0.5) anim.play("jump2");
-        else anim.play("jump");
+        }else anim.play("jump");
     }
 
     gameStart(){
         let anim = this.p1.getComponent(cc.Animation);
         if (GLB.iHorse != null){
             anim.play("run_"+GLB.iHorse);
-        }else if (this._iRand > 0.5) anim.play("run2");
-        else anim.play();
+        }else anim.play();
         this._speed = SPEED;
         this._gameStatus = 1;
         this._iCount = 0;
@@ -292,24 +281,35 @@ export default class Level extends cc.Component {
 
     showPlayers(){
         let top = cc.find("top", this.node);
+        let nameMe = "", nameOther = "";
+        let me = top.getChildByName("me");
+        let other = top.getChildByName("other");
         if (GLB.userInfo && GLB.userInfo instanceof Object){
-            let me = top.getChildByName("me");
-            me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+            nameMe = this.getStrName(GLB.userInfo.nickName);
             if (GLB.userInfo.avatarUrl){
                 cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    if (error) {
+                        console.log("load pic error", error);
+                        return;
+                    }
                     me.getChildByName("pic").getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
                 });
             }
         }
         if (GLB.otherInfo && GLB.otherInfo instanceof Object){
-            let other = top.getChildByName("other");
-            other.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.otherInfo.nickName);
+            nameOther = this.getStrName(GLB.otherInfo.nickName);
             if (GLB.otherInfo.avatarUrl){
                 cc.loader.load({ url: GLB.otherInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    if (error) {
+                        console.log("load pic error", error);
+                        return;
+                    }
                     other.getChildByName("pic").getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
                 });
             }
         }
+        me.getChildByName("name").getComponent(cc.Label).string = nameMe;
+        other.getChildByName("name").getComponent(cc.Label).string = nameOther;
     }
 
     getStrName(s: string){
@@ -319,24 +319,35 @@ export default class Level extends cc.Component {
 
     showResult(iType){
         if (iType == 0) cc.find("lose", this.ndResult).active = true;
+        let nameMe = "", nameOther = "";
+        let me = this.ndResult.getChildByName("me");
+        let other = this.ndResult.getChildByName("other");
         if (GLB.userInfo && GLB.userInfo instanceof Object){
-            let me = this.ndResult.getChildByName("me");
-            me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+            nameMe = this.getStrName(GLB.userInfo.nickName);
             if (GLB.userInfo.avatarUrl){
                 cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    if (error) {
+                        console.log("load pic error", error);
+                        return;
+                    }
                     me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
                 });
             }
         }
         if (GLB.otherInfo && GLB.otherInfo instanceof Object){
-            let other = this.ndResult.getChildByName("other");
-            other.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.otherInfo.nickName);
+            nameOther = this.getStrName(GLB.otherInfo.nickName);
             if (GLB.otherInfo.avatarUrl){
                 cc.loader.load({ url: GLB.otherInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    if (error) {
+                        console.log("load pic error", error);
+                        return;
+                    }
                     other.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
                 });
             }
         }
+        me.getChildByName("name").getComponent(cc.Label).string = nameMe;
+        other.getChildByName("name").getComponent(cc.Label).string = nameOther;
     }
 
     showLines(){

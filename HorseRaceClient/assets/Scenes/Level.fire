@@ -1031,7 +1031,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 138,
+      "width": 151,
       "height": 175
     },
     "_anchorPoint": {
@@ -1081,7 +1081,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "0763bbf9-0a59-4ceb-9a9c-1b516fa70fd3"
+      "__uuid__": "c5695c08-83a7-4bc4-a11a-0c852db4c48c"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -1106,7 +1106,7 @@
     },
     "_enabled": true,
     "_defaultClip": {
-      "__uuid__": "96503877-3d5d-4eb0-8390-72fd33201a2c"
+      "__uuid__": "a575638e-45ce-4364-bbe9-d25d9b53e344"
     },
     "_clips": [
       {
@@ -1752,7 +1752,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 0,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -1800,8 +1800,8 @@
       }
     ],
     "_useOriginalSize": false,
-    "_string": "洞房不败啊",
-    "_N$string": "洞房不败啊",
+    "_string": "",
+    "_N$string": "",
     "_fontSize": 20,
     "_lineHeight": 20,
     "_enableWrapText": true,
@@ -2214,7 +2214,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 0,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -2262,8 +2262,8 @@
       }
     ],
     "_useOriginalSize": false,
-    "_string": "洞房不败啊",
-    "_N$string": "洞房不败啊",
+    "_string": "",
+    "_N$string": "",
     "_fontSize": 20,
     "_lineHeight": 20,
     "_enableWrapText": true,
@@ -3102,8 +3102,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -90.604,
-      "y": -1.229,
+      "x": -91.594,
+      "y": -0.239,
       "z": 0
     },
     "_scale": {
@@ -3152,7 +3152,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 90,
+      "width": 0,
       "height": 22.68
     },
     "_anchorPoint": {
@@ -3200,8 +3200,8 @@
       }
     ],
     "_useOriginalSize": false,
-    "_string": "洞房不败啊",
-    "_N$string": "洞房不败啊",
+    "_string": "",
+    "_N$string": "",
     "_fontSize": 18,
     "_lineHeight": 18,
     "_enableWrapText": true,
@@ -3286,8 +3286,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 89.723,
-      "y": -1.229,
+      "x": 90.241,
+      "y": -0.193,
       "z": 0
     },
     "_scale": {
@@ -3336,7 +3336,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 90,
+      "width": 0,
       "height": 22.68
     },
     "_anchorPoint": {
@@ -3384,8 +3384,8 @@
       }
     ],
     "_useOriginalSize": false,
-    "_string": "洞房不败啊",
-    "_N$string": "洞房不败啊",
+    "_string": "",
+    "_N$string": "",
     "_fontSize": 18,
     "_lineHeight": 18,
     "_enableWrapText": true,
@@ -3810,9 +3810,6 @@
     "ndBtn": {
       "__id__": 29
     },
-    "horse2": {
-      "__uuid__": "c5695c08-83a7-4bc4-a11a-0c852db4c48c"
-    },
     "labMeLines": {
       "__id__": 42
     },
@@ -3837,6 +3834,9 @@
       },
       {
         "__uuid__": "c6950af1-f805-4850-8c0f-361549dca1d9"
+      },
+      {
+        "__uuid__": "0763bbf9-0a59-4ceb-9a9c-1b516fa70fd3"
       }
     ],
     "music": {

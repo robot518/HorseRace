@@ -14,6 +14,7 @@ var GLB = {
     WXLOGIN: "wxLogin",
     MATCH: "match",
     LOSE: "lose",
+    QUIT: "quit",
 
     getTime(){
         let s = "[";

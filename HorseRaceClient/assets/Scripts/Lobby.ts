@@ -15,6 +15,9 @@ export default class Lobby extends cc.Component {
     @property(cc.Node)
     btnMatch: cc.Node = null;
 
+    @property(cc.Label)
+    labTime: cc.Label = null;
+
     @property(cc.Sprite)
     sptHorse: cc.Sprite = null;
 
@@ -38,6 +41,9 @@ export default class Lobby extends cc.Component {
     _bLoaded: boolean;
     UserInfoButton: any;
     _iHorse: number = 0;
+    _iTime: number = 0;
+    _bMatch: boolean = false;
+    _bTest: boolean = true;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -49,12 +55,23 @@ export default class Lobby extends cc.Component {
         this.initEvent();
         this.initShow();
         this.initMsgBox();
-        this.onWxEvent("login");
-        // this.onWxEvent("auth");
-        this.onWxEvent("onShow");
     }
 
-    // update (dt) {}
+    update (dt) {
+        if (this._bMatch){
+            this._iTime+=dt;
+            this.showTime();
+            if (this._iTime > 15){
+                this._bMatch = false;
+                this._iTime = 0;
+                WS.sendMsg(GLB.QUIT, GLB.OpenID, this);
+                cc.director.loadScene("Level", function (err, scene) {
+                    var obj = scene.getChildByName("Canvas").getComponent("Level");
+                    WS.obj = obj;
+                });
+            }
+        }
+    }
 
     initCanvas(){
         var canvas = this.node.getComponent(cc.Canvas);
@@ -71,6 +88,7 @@ export default class Lobby extends cc.Component {
 
     initParas(){
         this._bLoaded = false;
+        if (GLB.OpenID == "") GLB.OpenID = Math.random().toFixed(6);
     }
 
     initEvent(){
@@ -111,13 +129,13 @@ export default class Lobby extends cc.Component {
         cc.find("right", shopBg).on("click", function (params) {
             this.playSound("click");
             this._iHorse++;
-            if (this._iHorse > 4) this._iHorse = 0;
+            if (this._iHorse > this.tHorseName.length-1) this._iHorse = 0;
             this.showHorse();
         }, this);
         cc.find("left", shopBg).on("click", function (params) {
             this.playSound("click");
             this._iHorse--;
-            if (this._iHorse < 0) this._iHorse = 4;
+            if (this._iHorse < 0) this._iHorse = this.tHorseName.length-1;
             this.showHorse();
         }, this);
         // this.onWxEvent("initBanner");
@@ -128,12 +146,16 @@ export default class Lobby extends cc.Component {
             invite.on("click", function (params) {
                 this.onWxEvent("invite");
             }, this);
+
+            this.onWxEvent("login");
+            this.onWxEvent("onShow");
         }
     }
 
     initShow(){
         if (this.UserInfoButton) this.UserInfoButton.show();
         WS.sendMsg("0");
+        if (this._bTest) this.labTime.node.active = true;
     }
 
     initMsgBox(){
@@ -240,7 +262,7 @@ export default class Lobby extends cc.Component {
                         destWidth: 500,
                         destHeight: 400
                     }),
-                    query: "OpenID=123&userInfo=GLB.userInfo",
+                    query: GLB.OpenID,
                 });
                 break;
             case "onShow":
@@ -301,11 +323,10 @@ export default class Lobby extends cc.Component {
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {
-                                // console.log("Res = ", res);
+                                // console.log("Res = ", res);s
                                 if (res.userInfo){
                                     GLB.userInfo = res.userInfo;
-                                    // let str = GLB.OpenID+"|"+res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
-                                    let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
+                                    let str = GLB.OpenID+"&"+res.userInfo.nickName+"&"+res.userInfo.avatarUrl;
                                     if (WS.sendMsg(GLB.WXLOGIN, str)){
                                         // self.onMatch();
                                         self.UserInfoButton.hide();
@@ -318,7 +339,7 @@ export default class Lobby extends cc.Component {
                                 success(res){
                                     // console.log("Res = ", res);
                                     GLB.userInfo = res.userInfo;
-                                    let str = res.userInfo.nickName+"|"+res.userInfo.avatarUrl;
+                                    let str = GLB.OpenID+"&"+res.userInfo.nickName+"&"+res.userInfo.avatarUrl;
                                     WS.sendMsg(GLB.WXLOGIN, str);
                                 }
                             })
@@ -381,14 +402,22 @@ export default class Lobby extends cc.Component {
 
     onMatch(){
         if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this)){
+            this._bMatch = true;
+            this._iTime = 0;
             this.ndMatch.active = true;
+            let me = this.ndMatch.getChildByName("me");
+            let str = "";
             if (GLB.userInfo){
-                let me = this.ndMatch.getChildByName("me");
-                me.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.userInfo.nickName);
+                str = this.getStrName(GLB.userInfo.nickName);
                 cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    if (error) {
+                        console.log("load pic error", error);
+                        return;
+                    }
                     me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
                 });
             }
+            me.getChildByName("name").getComponent(cc.Label).string = str;
         }
     }
 
@@ -399,6 +428,10 @@ export default class Lobby extends cc.Component {
             other.getChildByName("name").getComponent(cc.Label).string = this.getStrName(GLB.otherInfo.nickName);
             if (GLB.otherInfo.avatarUrl){
                 cc.loader.load({ url: GLB.otherInfo.avatarUrl, type: "png" }, (error, texture) => {
+                    if (error) {
+                        console.log("load pic error", error);
+                        return;
+                    }
                     other.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
                 });
             }
@@ -413,5 +446,9 @@ export default class Lobby extends cc.Component {
     showHorse(){
         this.sptHorse.spriteFrame = this.tHorsePic[this._iHorse];
         this.sptName.spriteFrame = this.tHorseName[this._iHorse];
+    }
+
+    showTime(){
+        this.labTime.string = this._iTime.toFixed(0);
     }
 }

@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "run",
+  "_name": "run2",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.4,
@@ -14,25 +14,25 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "0763bbf9-0a59-4ceb-9a9c-1b516fa70fd3"
+              "__uuid__": "c5695c08-83a7-4bc4-a11a-0c852db4c48c"
             }
           },
           {
             "frame": 0.1,
             "value": {
-              "__uuid__": "adaf69cd-230b-45be-abcd-bc05044734d2"
+              "__uuid__": "f0030c1f-9981-4149-98a7-f65c6367e326"
             }
           },
           {
             "frame": 0.2,
             "value": {
-              "__uuid__": "29156dc5-1e3f-4efb-9607-91b009453457"
+              "__uuid__": "0d8291d5-0b21-4c92-8d13-dbbec7b17339"
             }
           },
           {
             "frame": 0.3,
             "value": {
-              "__uuid__": "216ad546-5cb3-47c2-942a-41b24df4501e"
+              "__uuid__": "a223b591-6337-48f0-b5bd-8cd96adb7a50"
             }
           }
         ]

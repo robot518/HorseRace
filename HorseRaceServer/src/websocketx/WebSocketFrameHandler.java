@@ -22,49 +22,24 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
 import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Echoes uppercase content of text frames.
  */
 public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
-    private static long iCount = 0;
-    static List<ChannelHandlerContext> lCtx = new ArrayList<>(); //存放所有参与匹配的进程
+    static List<String> lUsers = new ArrayList<>(); //存放所有参与匹配的OpenID
     static HashMap<ChannelHandlerContext, ChannelHandlerContext> mapCtx = new HashMap<>(); //索引为A方，字段为与A对战的B方
-    static HashMap<ChannelHandlerContext, String> mapUserInfo = new HashMap<>(); //索引为玩家进程，字段为玩家信息
-//    long startTime = -1;
+    static HashMap<ChannelHandlerContext, String> mapUserCtx = new HashMap<>(); //索引为玩家进程，字段OpenID
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        iCount++;
-//        if (startTime < 0) {
-//            startTime = System.currentTimeMillis();
-//        }
-//        String sDate = new SimpleDateFormat("MMdd").format(new Date());
-//        SocketAddress addr = ctx.channel().remoteAddress();
-//        Redis.getInstance().setRecord(sDate, getStrAddress(addr), -1);
-//        System.out.println("channelActive:"+getStrDate()+ctx.channel().remoteAddress()+"\t"+addr);
-    }
+//    @Override
+//    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+//    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        iCount--;
-        mapUserInfo.remove(ctx);
-        lCtx.remove(ctx);
+        lUsers.remove(mapUserCtx.remove(ctx));
         mapCtx.remove(ctx);
-//        Long iDate = (System.currentTimeMillis() - startTime) / 1000;
-//        String sDate = new SimpleDateFormat("MMdd").format(new Date());
-//        SocketAddress addr = ctx.channel().remoteAddress();
-//        Redis.getInstance().setRecord(sDate, getStrAddress(addr), iDate);
-//        System.out.println("channelInactive:"+getStrDate()+ctx.channel().remoteAddress()+"\t"+addr);
-    }
-
-    String getStrAddress(SocketAddress addr){
-        String sAddress = addr.toString();
-        return sAddress.substring(1, sAddress.indexOf(":"));
     }
 
     String getStrDate(){
@@ -85,37 +60,39 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
             int iColon = request.indexOf(":");
             if (iColon == -1) return;
             String cmd = request.substring(0, iColon);
-//            String sName = "";
+            String OpenID = "", otherOpenID = "";
 //            String sResponse = "200"; //请求成功
             ChannelHandlerContext oCtx = null;
-//            int i1 = request.indexOf("|", 1); //第一个"|"的位置；
-//            if (i1 != -1)
-//                sName = request.substring(iColon + 1, i1);
+            int i1 = request.indexOf("&", 1); //第一个"&"的位置；
+            if (i1 != -1) OpenID = request.substring(iColon + 1, i1);
             switch (cmd) {
                 case "wxLogin":
-//                    String nickName = request.substring(iColon + 1, i1);
-//                    String avatarUrl = request.substring(i1+1);
-                    String userInfo = request.substring(iColon + 1);
-                    mapUserInfo.put(ctx, userInfo);
+                    String userInfo = request.substring(i1 + 1);
+                    Redis.getInstance().setUserInfo(OpenID, userInfo);
+                    mapUserCtx.put(ctx, OpenID);
                     break;
                 case "match":
-//                    String OpenID = request.substring(iColon + 1);
-                    if (lCtx.size() > 0){
-                        oCtx = lCtx.remove(0);
-                        String other = mapUserInfo.get(oCtx);
-                        if (other == null) other = "";
-                        String me = mapUserInfo.get(ctx);
-                        if (me == null) me = "";
-                        System.out.println(getStrDate()+ctx.channel().remoteAddress()+"\t"+"me="+me+"\t"+"other="+other);
-                        ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+other));
-                        oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+me));
-                        mapCtx.put(ctx, oCtx);
-                        mapCtx.put(oCtx, ctx);
-                    }else lCtx.add(ctx);
-                    break;
-                case "jump":
-                    oCtx = mapCtx.get(ctx);
-                    if (oCtx != null) oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"));
+                    OpenID = request.substring(iColon + 1);
+                    if (lUsers.size() > 0){
+                        otherOpenID = lUsers.remove(0);
+                        for(Map.Entry<ChannelHandlerContext, String> entry : mapUserCtx.entrySet()){
+                            String v = entry.getValue();
+                            if(v.equals(otherOpenID)){
+                                oCtx = entry.getKey();
+                                Redis redis = Redis.getInstance();
+                                String other = redis.getUserInfo(otherOpenID);
+                                if (other == null) other = "";
+                                String me = redis.getUserInfo(OpenID);
+                                if (me == null) me = "";
+//                                System.out.println(getStrDate()+ctx.channel().remoteAddress()+"\t"+"me="+me+"\t"+"other="+other);
+                                ctx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+other));
+                                oCtx.channel().writeAndFlush(new TextWebSocketFrame(cmd + ":"+me));
+                                mapCtx.put(ctx, oCtx);
+                                mapCtx.put(oCtx, ctx);
+                                break;
+                            }
+                        }
+                    }else lUsers.add(OpenID);
                     break;
                 case "lose":
                     oCtx = mapCtx.get(ctx);
@@ -124,6 +101,10 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
                         mapCtx.remove(oCtx);
                     }
                     mapCtx.remove(ctx);
+                    break;
+                case "quit":
+                    OpenID = request.substring(iColon + 1);
+                    lUsers.remove(OpenID);
                     break;
             }
         } else {
