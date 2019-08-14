@@ -37,7 +37,7 @@
   },
   "startScene": "817afdc2-81b9-4283-9fab-00a5d4bd56c8",
   "title": "HorseRaceClient",
-  "webOrientation": "auto",
+  "webOrientation": "portrait",
   "wechatgame": {
     "REMOTE_SERVER_ROOT": "",
     "appid": "wxfbc58b2a422781e5",

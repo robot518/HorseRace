@@ -43,7 +43,7 @@ export default class Lobby extends cc.Component {
     _iHorse: number = 0;
     _iTime: number = 0;
     _bMatch: boolean = false;
-    _bTest: boolean = true;
+    _bTest: boolean = false;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -92,10 +92,6 @@ export default class Lobby extends cc.Component {
     }
 
     initEvent(){
-        cc.find("share", this.node).on("click", function (argument) {
-            this.playSound("click");
-            this.onWxEvent("share");
-        }, this);
         this.btnMatch.on("click", function (argument) {
             this.playSound("click");
             // GLB.iHorse = null;
@@ -145,6 +141,12 @@ export default class Lobby extends cc.Component {
             invite.active = true;
             invite.on("click", function (params) {
                 this.onWxEvent("invite");
+            }, this);
+            let share = cc.find("share", this.node);
+            share.active = true;
+            share.on("click", function (argument) {
+                this.playSound("click");
+                this.onWxEvent("share");
             }, this);
 
             this.onWxEvent("login");
