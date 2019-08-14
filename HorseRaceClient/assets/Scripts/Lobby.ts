@@ -155,8 +155,6 @@ export default class Lobby extends cc.Component {
     }
 
     initShow(){
-        if (this.UserInfoButton) this.UserInfoButton.show();
-        WS.sendMsg("0");
         if (this._bTest) this.labTime.node.active = true;
     }
 
