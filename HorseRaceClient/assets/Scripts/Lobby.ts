@@ -61,14 +61,28 @@ export default class Lobby extends cc.Component {
         if (this._bMatch){
             this._iTime+=dt;
             this.showTime();
-            if (this._iTime > 15){
+            if (this._iTime > 10){
                 this._bMatch = false;
                 this._iTime = 0;
                 WS.sendMsg(GLB.QUIT, GLB.OpenID, this);
-                cc.director.loadScene("Level", function (err, scene) {
-                    var obj = scene.getChildByName("Canvas").getComponent("Level");
-                    WS.obj = obj;
-                });
+                if (this._bannerAd != null) this._bannerAd.hide();
+                if (this._videoAd != null) this._videoAd.offClose();
+                if (CC_WECHATGAME){
+                    cc.loader.downloader.loadSubpackage('subAtlas', function (err) {
+                        if (err) {
+                            return console.error(err);
+                        }
+                        cc.director.loadScene("Level", function (err, scene) {
+                            var obj = scene.getChildByName("Canvas").getComponent("Level");
+                            WS.obj = obj;
+                        });
+                    });
+                }else{
+                    cc.director.loadScene("Level", function (err, scene) {
+                        var obj = scene.getChildByName("Canvas").getComponent("Level");
+                        WS.obj = obj;
+                    });
+                }
             }
         }
     }
@@ -77,7 +91,16 @@ export default class Lobby extends cc.Component {
         var canvas = this.node.getComponent(cc.Canvas);
         var size = canvas.designResolution;
         var cSize = cc.view.getFrameSize();
-        if (cSize.width/cSize.height >= size.width/size.height){
+        if (cc.sys.os == cc.sys.OS_IOS){ //刘海屏判断
+            GLB.bSpView = (cSize.width == 414 && cSize.height == 896)||(cSize.width == 375 && cSize.height == 812);
+        }
+        // else{
+        //     if (cSize.height/cSize.width > 16/9) GLB.bSpView = true;
+        // }
+        if (GLB.bSpView){
+            canvas.fitWidth = true;
+            canvas.fitHeight = true;
+        }else if (cSize.width/cSize.height >= size.width/size.height){
             canvas.fitWidth = false;
             canvas.fitHeight = true;
         }else{
@@ -94,12 +117,7 @@ export default class Lobby extends cc.Component {
     initEvent(){
         this.btnMatch.on("click", function (argument) {
             this.playSound("click");
-            // GLB.iHorse = null;
             this.onMatch();
-            // cc.director.loadScene("Level", function (err, scene) {
-            //     var obj = scene.getChildByName("Canvas").getComponent("Level");
-            //     WS.obj = obj;
-            // });
         }, this);
         cc.find("btnShop", this.node).on("click", function (argument) {
             this.playSound("click");
@@ -112,15 +130,7 @@ export default class Lobby extends cc.Component {
         let shopBg = cc.find("bg", this.ndShop);
         cc.find("btn", shopBg).on("click", function (params) {
             this.playSound("click");
-            if (this._iHorse == 0 || this._iHorse == 4){
-                GLB.iHorse = this._iHorse;
-                this.ndShop.active = false;
-                this.onMatch();
-            }
-            // cc.director.loadScene("Level", function (err, scene) {
-            //     var obj = scene.getChildByName("Canvas").getComponent("Level");
-            //     WS.obj = obj;
-            // });
+            if (this._videoAd != null) this._videoAd.show();
         }, this);
         cc.find("right", shopBg).on("click", function (params) {
             this.playSound("click");
@@ -134,8 +144,6 @@ export default class Lobby extends cc.Component {
             if (this._iHorse < 0) this._iHorse = this.tHorseName.length-1;
             this.showHorse();
         }, this);
-        // this.onWxEvent("initBanner");
-        // this.onWxEvent("initVideo");
         if (CC_WECHATGAME){
             let invite = cc.find("invite", this.ndMatch);
             invite.active = true;
@@ -151,6 +159,8 @@ export default class Lobby extends cc.Component {
 
             this.onWxEvent("login");
             this.onWxEvent("onShow");
+            this.onWxEvent("initBanner");
+            this.onWxEvent("initVideo");
         }
     }
 
@@ -180,17 +190,13 @@ export default class Lobby extends cc.Component {
 
     onResponse(cmd, msg){
         var args = msg.split("|");
-        // if (cmd == GLB.REGISTER || cmd == GLB.LOGIN){
-        //     // if (msg == "200"){ //成功
-        //     //     this.ndRegister.active = false;
-        //     //     this.initGLBData();
-        //     //     WS.sendMsg(GLB.GET_SCORE, GLB.sName, this);
-        //     // } else
-        //     //     this.playTips(msg);
-        // }else 
         if (cmd == GLB.MATCH){
-            let res = {"nickName": args[0], "avatarUrl": args[1]};
+            let res = null;
+            if (args.length == 2) res = {"nickName": args[0], "avatarUrl": args[1]};
+            else res = {"nickName": args[1], "avatarUrl": args[2]};
             this.showMatchOther(res);
+            if (this._bannerAd != null) this._bannerAd.hide();
+            if (this._videoAd != null) this._videoAd.offClose();
             if (CC_WECHATGAME){
                 cc.loader.downloader.loadSubpackage('subAtlas', function (err) {
                     if (err) {
@@ -215,45 +221,47 @@ export default class Lobby extends cc.Component {
         let self = this;
         switch(s){
             case "initBanner":
-                // if (this._bannerAd != null)
-                //     this._bannerAd.destory();
-                // var systemInfo = wx.getSystemInfoSync();
-                // this._bannerAd = wx.createBannerAd({
-                //     adUnitId: 'adunit-24778ca4dc4e174a',
-                //     style: {
-                //         left: 0,
-                //         top: systemInfo.windowHeight - 144,
-                //         width: 720,
-                //     }
-                // });
-                // var self = this;
-                // this._bannerAd.onResize(res => {
-                //     if (self._bannerAd)
-                //         self._bannerAd.style.top = systemInfo.windowHeight - self._bannerAd.style.realHeight;
-                // })
-                // this._bannerAd.show();
-                // this._bannerAd.onError(err => {
-                //   console.log(err);
-                //   //无合适广告
-                //   if (err.errCode == 1004){
+                if (this._bannerAd != null) this._bannerAd.show();
+                else {
+                    var systemInfo = wx.getSystemInfoSync();
+                    this._bannerAd = wx.createBannerAd({
+                        adUnitId: 'adunit-68a8244d86c7bf29',
+                        style: {
+                            left: 0,
+                            top: systemInfo.windowHeight - 144,
+                            width: 720,
+                        }
+                    });
+                    this._bannerAd.onResize(res => {
+                        if (self._bannerAd)
+                            self._bannerAd.style.top = systemInfo.windowHeight - self._bannerAd.style.realHeight;
+                    })
+                    this._bannerAd.show();
+                    this._bannerAd.onError(err => {
+                        console.log(err);
+                        //无合适广告
+                        if (err.errCode == 1004){
 
-                //   }
-                // })
+                        }
+                    })
+                }
                 break;
             case "initVideo":
-                // this._videoAd = wx.createRewardedVideoAd({
-                //     adUnitId: 'adunit-a7fcb876faba0c89'
-                // });
-                // this._videoAd.onClose(res => {
-                //     if (res && res.isEnded || res === undefined){
-                //         this.loadMusic();
-                //     }else{
+                this._videoAd = wx.createRewardedVideoAd({
+                    adUnitId: 'adunit-832cda6401b268ef'
+                });
+                this._videoAd.onClose(res => {
+                    if (res && res.isEnded || res === undefined){
+                        GLB.iHorse = self._iHorse;
+                        self.ndShop.active = false;
+                        self.onMatch();
+                    }else{
 
-                //     }
-                // });
-                // this._videoAd.onError(err => {
-                //   console.log(err)
-                // });
+                    }
+                });
+                this._videoAd.onError(err => {
+                  console.log(err)
+                });
                 break;
             case "invite":
                 wx.shareAppMessage({
@@ -286,40 +294,28 @@ export default class Lobby extends cc.Component {
                 });
                 break;
             case "showVideo":
-                // if (self._videoAd != null){
-                //     self._videoAd.show()
-                //     .catch(err => {
-                //         self._videoAd.load()
-                //         .then(() => self._videoAd.show())
-                //     })
-                // }
+                if (self._videoAd != null){
+                    self._videoAd.show()
+                    .catch(err => {
+                        self._videoAd.load()
+                        .then(() => self._videoAd.show())
+                    })
+                }
                 break;
             case "auth":
                 wx.getSetting({
                     success(res) {
                         if (!res.authSetting['scope.userInfo']) {
-                            // let size = cc.view.getFrameSize();
                             let dSize = self.node.getComponent(cc.Canvas).designResolution;
-                            // let pix = 1;
-                            // if (size.width/size.height >= dSize.width/dSize.height){
-                            //     pix = dSize.height/size.height;
-                            // }else pix = dSize.width/size.width;
-                            // let width = self.btnMatch.width/pix, height = self.btnMatch.height/pix;
-                            // console.log(size, width, height, pix);
                             self.UserInfoButton = wx.createUserInfoButton({
                                 type: 'text',
                                 text: '',
                                 withCredentials: GLB.withCredentials,
                                 style: {
-                                    // left: size.width/2-width/2,
-                                    // top: size.height/2-self.btnMatch.y*size.height/dSize.height-height/2,
-                                    // width: width,
-                                    // height: height,
                                     left: 0,
                                     top: 0,
                                     width: dSize.width,
                                     height: dSize.height,
-                                    // backgroundColor: '#ff0000',
                                 }
                             })
                             self.UserInfoButton.onTap((res) => {

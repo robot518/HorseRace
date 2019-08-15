@@ -94,7 +94,7 @@ WS.reconnect = function () {
         bError = false;
         creatWS();
         lockReconnect = false;
-    }, 4000)
+    }, 1000)
 };
 creatWS();
 export {WS};

@@ -9,6 +9,7 @@ var GLB = {
     OpenID: "",
     withCredentials: false,
     iHorse: null, //第几种马
+    bSpView: false, //刘海屏
 
     //event
     WXLOGIN: "wxLogin",

@@ -78,6 +78,8 @@ export default class Level extends cc.Component {
     _iLineIdx: number;
     _iLineIdx2: number;
     _iTurn: number; //几轮
+    _bannerAd: any;
+    _interstitialAd: any;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -150,7 +152,10 @@ export default class Level extends cc.Component {
         var canvas = this.node.getComponent(cc.Canvas);
         var size = canvas.designResolution;
         var cSize = cc.view.getFrameSize();
-        if (cSize.width/cSize.height >= size.width/size.height){
+        if (GLB.bSpView){
+            canvas.fitWidth = true;
+            canvas.fitHeight = true;
+        }else if (cSize.width/cSize.height >= size.width/size.height){
             canvas.fitWidth = false;
             canvas.fitHeight = true;
         }else{
@@ -175,8 +180,13 @@ export default class Level extends cc.Component {
             }
         }, this);
         cc.find("back", this.ndResult).on("click", function (argument) {
+            if (this._bannerAd != null) this._bannerAd.hide();
             cc.director.loadScene("Lobby");
         }, this);
+        if (CC_WECHATGAME){
+            this.onWxEvent("initBanner");
+            this.onWxEvent("initInterstitial");
+        }
     }
 
     initShow(){
@@ -318,6 +328,10 @@ export default class Level extends cc.Component {
     }
 
     showResult(iType){
+        if (this._interstitialAd != null) {
+            if (Math.random() > 0.5) this.onWxEvent("showInterstitial");
+        }
+        if (this._bannerAd != null) this._bannerAd.show();
         if (iType == 0) cc.find("lose", this.ndResult).active = true;
         let nameMe = "", nameOther = "";
         let me = this.ndResult.getChildByName("me");
@@ -368,6 +382,55 @@ export default class Level extends cc.Component {
             this._iTurn++;
             this._iTimeIdx = 0;
             this._iTime = 0;
+        }
+    }
+
+    onWxEvent(s){
+        if (!CC_WECHATGAME) return;
+        let self = this;
+        switch(s){
+            case "initBanner":
+                if (this._bannerAd != null) this._bannerAd.show();
+                else {
+                    var systemInfo = wx.getSystemInfoSync();
+                    this._bannerAd = wx.createBannerAd({
+                        adUnitId: 'adunit-854c72e25a0acac1',
+                        style: {
+                            left: 0,
+                            top: systemInfo.windowHeight - 144,
+                            width: 720,
+                        }
+                    });
+                    this._bannerAd.onResize(res => {
+                        if (self._bannerAd)
+                            self._bannerAd.style.top = systemInfo.windowHeight - self._bannerAd.style.realHeight;
+                    })
+                    this._bannerAd.hide();
+                    this._bannerAd.onError(err => {
+                        console.log(err);
+                        //无合适广告
+                        if (err.errCode == 1004){
+
+                        }
+                    })
+                }
+                break;
+            case "initInterstitial":
+                // 创建插屏广告实例，提前初始化
+                if (wx.createInterstitialAd){
+                    this._interstitialAd = wx.createInterstitialAd({
+                        adUnitId: 'adunit-de5faf6c0ccbb673'
+                    })
+                }
+                break;
+            case "showInterstitial":
+                // 在适合的场景显示插屏广告
+                if (this._interstitialAd) {
+                    this._interstitialAd.show().catch((err) => {
+                        console.error(err)
+                    })
+                }
+                break;
         }
     }
 }
