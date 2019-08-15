@@ -45,7 +45,7 @@ var creatWS = function () {
         heartCheck.start();
         var data = event.data;
         if (data == "0") return;
-        // console.log(GLB.getTime()+"response text msg = " + data);
+        console.log(GLB.getTime()+"response text msg = " + data);
         var i1 = data.indexOf(":");
         if (i1 == -1 || WS.obj == null) return;
         var cmd = data.substring(0, i1);
@@ -71,7 +71,7 @@ WS.sendMsg = function (cmd: string, msg: string, obj) {
         }
         msg = msg || "";
         var str = cmd + ":" + msg.toString();
-        // console.log(GLB.getTime()+"sendMsg = ", str);
+        console.log(GLB.getTime()+"sendMsg = ", str);
         ws.send(str);
         if (obj != null){
             WS.obj = obj;

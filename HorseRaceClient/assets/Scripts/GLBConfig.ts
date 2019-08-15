@@ -1,6 +1,7 @@
 /* 存放全局变量 */
 var GLB = {
     ip: "47.111.184.119:8081",
+    // ip: "127.0.0.1:8081",
     isClickCd: false,
     msgBox: null,
     usrId: null,

@@ -189,7 +189,7 @@ export default class Lobby extends cc.Component {
     }
 
     onResponse(cmd, msg){
-        var args = msg.split("|");
+        var args = msg.split("&");
         if (cmd == GLB.MATCH){
             let res = null;
             if (args.length == 2) res = {"nickName": args[0], "avatarUrl": args[1]};

@@ -2,10 +2,6 @@ package websocketx;
 
 import redis.clients.jedis.*;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Set;
-
 public class Redis {
     private JedisPool pool;
     static Redis redis;
