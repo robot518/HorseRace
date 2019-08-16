@@ -17,6 +17,9 @@ public class Redis {
     private JedisPool getPool(){
         if (pool == null){
             pool = new JedisPool(new JedisPoolConfig(), "localhost", Protocol.DEFAULT_PORT, Protocol.DEFAULT_TIMEOUT, "1314");
+//            pool = new JedisPool(new JedisPoolConfig(), "guanzhiwangluogongyi.vip", Protocol.DEFAULT_PORT, Protocol.DEFAULT_TIMEOUT, "1314");
+//            pool = new JedisPool(new JedisPoolConfig(), "47.107.178.120", Protocol.DEFAULT_PORT, Protocol.DEFAULT_TIMEOUT, "1314");
+//            pool = new JedisPool(new JedisPoolConfig(), "47.107.178.120", Protocol.DEFAULT_PORT, Protocol.DEFAULT_TIMEOUT, "1314");
         }
         return pool;
     }

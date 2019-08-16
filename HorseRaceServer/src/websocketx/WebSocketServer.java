@@ -26,8 +26,6 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
-import java.util.HashMap;
-
 /**
  * A HTTP server which serves Web Socket requests at:
  *

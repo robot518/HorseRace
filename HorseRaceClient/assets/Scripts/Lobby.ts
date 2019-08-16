@@ -55,6 +55,7 @@ export default class Lobby extends cc.Component {
         this.initEvent();
         this.initShow();
         this.initMsgBox();
+        // WS.sendMsg(GLB.WXLOGIN, "qwer&1&2");
     }
 
     update (dt) {
@@ -357,7 +358,8 @@ export default class Lobby extends cc.Component {
                                 // console.log("code = ", res.code);
                                 wx.request({
                                     // url: 'http://'+GLB.ip,
-                                    url: "https://websocket.windgzs.cn/HorseRace/",
+                                    // url: "https://websocket.windgzs.cn/HorseRace/",
+                                    url: "https://websocket.guanzhiwangluogongyi.vip/",
                                     data: {
                                         code: res.code
                                     },
@@ -397,24 +399,23 @@ export default class Lobby extends cc.Component {
     }
 
     onMatch(){
-        if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this)){
-            this._bMatch = true;
-            this._iTime = 0;
-            this.ndMatch.active = true;
-            let me = this.ndMatch.getChildByName("me");
-            let str = "";
-            if (GLB.userInfo){
-                str = this.getStrName(GLB.userInfo.nickName);
-                cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
-                    if (error) {
-                        console.log("load pic error", error);
-                        return;
-                    }
-                    me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
-                });
-            }
-            me.getChildByName("name").getComponent(cc.Label).string = str;
+        if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this))
+        this._bMatch = true;
+        this._iTime = 0;
+        this.ndMatch.active = true;
+        let me = this.ndMatch.getChildByName("me");
+        let str = "";
+        if (GLB.userInfo){
+            str = this.getStrName(GLB.userInfo.nickName);
+            cc.loader.load({ url: GLB.userInfo.avatarUrl, type: "png" }, (error, texture) => {
+                if (error) {
+                    console.log("load pic error", error);
+                    return;
+                }
+                me.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture);
+            });
         }
+        me.getChildByName("name").getComponent(cc.Label).string = str;
     }
 
     showMatchOther(res){
