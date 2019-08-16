@@ -29,7 +29,8 @@ import java.util.*;
 public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
     static List<String> lUsers = new ArrayList<>(); //存放所有参与匹配的OpenID
     static HashMap<ChannelHandlerContext, ChannelHandlerContext> mapCtx = new HashMap<>(); //索引为A方，字段为与A对战的B方
-    static HashMap<ChannelHandlerContext, String> mapUserCtx = new HashMap<>(); //索引为玩家进程，字段OpenID
+    static HashMap<ChannelHandlerContext, String> mapUserCtxReverse = new HashMap<>(); //索引为玩家进程，字段OpenID
+    static HashMap<String, ChannelHandlerContext> mapUserCtx = new HashMap<>(); //索引为玩家进程，字段OpenID
 
 //    @Override
 //    public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -37,7 +38,11 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        lUsers.remove(mapUserCtx.remove(ctx));
+        String OpenID = mapUserCtxReverse.remove(ctx);
+        if (OpenID != null){
+            mapUserCtx.remove(OpenID);
+            lUsers.remove(OpenID);
+        }
         mapCtx.remove(ctx);
     }
 
@@ -68,17 +73,18 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
                 case "wxLogin":
                     String userInfo = request.substring(i1 + 1);
                     Redis.getInstance().setUserInfo(OpenID, userInfo);
-                    mapUserCtx.put(ctx, OpenID);
+                    mapUserCtxReverse.put(ctx, OpenID);
+                    mapUserCtx.put(OpenID, ctx);
                     break;
                 case "match":
                     OpenID = request.substring(iColon + 1);
+                    if (!lUsers.contains(OpenID)) return;
                     if (lUsers.size() > 0){
-                        otherOpenID = lUsers.remove(0);
-                        System.out.println(getStrDate()+"\t"+"me="+OpenID+"\t"+"other="+otherOpenID+"\t"+mapUserCtx.size());
-                        for(Map.Entry<ChannelHandlerContext, String> entry : mapUserCtx.entrySet()){
-                            String v = entry.getValue();
-                            if(v.equals(otherOpenID)){
-                                oCtx = entry.getKey();
+                        while(lUsers.size()>0){
+                            otherOpenID = lUsers.remove(0);
+//                            System.out.println(getStrDate()+"\t"+"me="+OpenID+"\t"+"other="+otherOpenID+"\t"+mapUserCtx.size());
+                            oCtx = mapUserCtx.get(otherOpenID);
+                            if (oCtx != null){
                                 Redis redis = Redis.getInstance();
                                 String other = redis.getUserInfo(otherOpenID);
                                 if (other == null) other = "";
@@ -92,7 +98,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
                                 break;
                             }
                         }
-                    }else if (!lUsers.contains(OpenID)) lUsers.add(OpenID);
+                    }else lUsers.add(OpenID);
                     break;
                 case "lose":
                     oCtx = mapCtx.get(ctx);
