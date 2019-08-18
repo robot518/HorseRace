@@ -56,6 +56,7 @@ export default class Lobby extends cc.Component {
         this.initShow();
         this.initMsgBox();
         // WS.sendMsg(GLB.WXLOGIN, "qwer&1&2");
+        // GLB.OpenID = "qwer";
     }
 
     update (dt) {
@@ -132,6 +133,9 @@ export default class Lobby extends cc.Component {
         cc.find("btn", shopBg).on("click", function (params) {
             this.playSound("click");
             if (this._videoAd != null) this._videoAd.show();
+            // GLB.iHorse = this._iHorse;
+            // this.ndShop.active = false;
+            // this.onMatch();
         }, this);
         cc.find("right", shopBg).on("click", function (params) {
             this.playSound("click");
