@@ -132,10 +132,12 @@ export default class Lobby extends cc.Component {
         let shopBg = cc.find("bg", this.ndShop);
         cc.find("btn", shopBg).on("click", function (params) {
             this.playSound("click");
-            if (this._videoAd != null) this._videoAd.show();
-            // GLB.iHorse = this._iHorse;
-            // this.ndShop.active = false;
-            // this.onMatch();
+            if (CC_WECHATGAME && this._videoAd != null) this._videoAd.show();
+            else{
+                GLB.iHorse = this._iHorse;
+                this.ndShop.active = false;
+                this.onMatch();
+            }
         }, this);
         cc.find("right", shopBg).on("click", function (params) {
             this.playSound("click");
