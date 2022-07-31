@@ -405,7 +405,7 @@ export default class Lobby extends cc.Component {
     }
 
     onMatch(){
-        if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this))
+        // if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this) == false) return;
         this._bMatch = true;
         this._iTime = 0;
         this.ndMatch.active = true;

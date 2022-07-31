@@ -80,7 +80,7 @@ WS.sendMsg = function (cmd: string, msg: string, obj) {
         return true;
     }else {
         console.log(GLB.getTime()+"WebSocket instance wasn't ready...");
-        if (GLB.msgBox) GLB.msgBox.active = true;
+        // if (GLB.msgBox) GLB.msgBox.active = true;
         return false;
     }
 };
