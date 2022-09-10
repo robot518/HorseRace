@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.7",
   "uuid": "0e19973d-527f-4260-8f0a-e48779d4dcc3",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "kung hei fat choy": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "c8e3c69e-e389-4ee2-8952-f3913b7e907b",
+      "importer": "sprite-frame",
       "rawTextureUuid": "0e19973d-527f-4260-8f0a-e48779d4dcc3",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.7",
   "uuid": "e99f508a-fdec-4bdb-9526-8ede91525bb4",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "magma-N": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "9d5142a3-84a5-448e-b396-ab60813b8009",
+      "importer": "sprite-frame",
       "rawTextureUuid": "e99f508a-fdec-4bdb-9526-8ede91525bb4",
       "trimType": "auto",
       "trimThreshold": 1,

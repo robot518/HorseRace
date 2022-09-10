@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.7",
   "uuid": "b7ece04f-df91-4cd0-9c6c-55a52b899668",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "terra-N": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "4dfc2545-ca3a-45e1-a4b6-c5bb739b1b5b",
+      "importer": "sprite-frame",
       "rawTextureUuid": "b7ece04f-df91-4cd0-9c6c-55a52b899668",
       "trimType": "auto",
       "trimThreshold": 1,
