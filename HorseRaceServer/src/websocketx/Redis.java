@@ -5,7 +5,7 @@ import redis.clients.jedis.*;
 public class Redis {
     private JedisPool pool;
     static Redis redis;
-    String USERINFO = "userInfo";
+    String USERINFO = "HorseRaceUserInfo";
 
     public static Redis getInstance(){
         if (redis == null){

@@ -43,5 +43,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="commons-pool2-2.6.0" level="project" />
   </component>
 </module>

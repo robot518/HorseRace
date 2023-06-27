@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="commons-pool2-2.6.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Lib/Jar/commons-pool2-2.6.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Lib/Jar/jedis-3.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Lib/Jar/netty-all-4.1.32.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Lib/Jar/slf4j-api-1.7.25.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -43,7 +43,7 @@ export default class Lobby extends cc.Component {
     _iHorse: number = 0;
     _iTime: number = 0;
     _bMatch: boolean = false;
-    _bTest: boolean = false;
+    _bTest: boolean = true;
 
     // LIFE-CYCLE CALLBACKS:
 
@@ -55,8 +55,6 @@ export default class Lobby extends cc.Component {
         this.initEvent();
         this.initShow();
         this.initMsgBox();
-        // WS.sendMsg(GLB.WXLOGIN, "qwer&1&2");
-        // GLB.OpenID = "qwer";
     }
 
     update (dt) {
@@ -67,24 +65,10 @@ export default class Lobby extends cc.Component {
                 this._bMatch = false;
                 this._iTime = 0;
                 WS.sendMsg(GLB.QUIT, GLB.OpenID, this);
-                if (this._bannerAd != null) this._bannerAd.hide();
-                if (this._videoAd != null) this._videoAd.offClose();
-                if (CC_WECHATGAME){
-                    cc.loader.downloader.loadSubpackage('subAtlas', function (err) {
-                        if (err) {
-                            return console.error(err);
-                        }
-                        cc.director.loadScene("Level", function (err, scene) {
-                            var obj = scene.getChildByName("Canvas").getComponent("Level");
-                            WS.obj = obj;
-                        });
-                    });
-                }else{
-                    cc.director.loadScene("Level", function (err, scene) {
-                        var obj = scene.getChildByName("Canvas").getComponent("Level");
-                        WS.obj = obj;
-                    });
-                }
+                cc.director.loadScene("Level", function (err, scene) {
+                    var obj = scene.getChildByName("Canvas").getComponent("Level");
+                    WS.obj = obj;
+                });
             }
         }
     }
@@ -113,7 +97,12 @@ export default class Lobby extends cc.Component {
 
     initParas(){
         this._bLoaded = false;
-        if (GLB.OpenID == "") GLB.OpenID = Math.random().toFixed(6);
+        if (GLB.OpenID == "") {
+            GLB.OpenID = Math.random().toFixed(6);
+            WS.sendMsg(GLB.WXLOGIN, GLB.OpenID+"&1&2");
+            // GLB.OpenID = "qwer";
+            //  console.log("GLB.OpenID=",GLB.OpenID+"&1&2"); //0.103762
+        }
     }
 
     initEvent(){
@@ -132,12 +121,9 @@ export default class Lobby extends cc.Component {
         let shopBg = cc.find("bg", this.ndShop);
         cc.find("btn", shopBg).on("click", function (params) {
             this.playSound("click");
-            if (CC_WECHATGAME && this._videoAd != null) this._videoAd.show();
-            else{
-                GLB.iHorse = this._iHorse;
-                this.ndShop.active = false;
-                this.onMatch();
-            }
+            GLB.iHorse = this._iHorse;
+            this.ndShop.active = false;
+            this.onMatch();
         }, this);
         cc.find("right", shopBg).on("click", function (params) {
             this.playSound("click");
@@ -151,24 +137,6 @@ export default class Lobby extends cc.Component {
             if (this._iHorse < 0) this._iHorse = this.tHorseName.length-1;
             this.showHorse();
         }, this);
-        if (CC_WECHATGAME){
-            let invite = cc.find("invite", this.ndMatch);
-            invite.active = true;
-            invite.on("click", function (params) {
-                this.onWxEvent("invite");
-            }, this);
-            let share = cc.find("share", this.node);
-            share.active = true;
-            share.on("click", function (argument) {
-                this.playSound("click");
-                this.onWxEvent("share");
-            }, this);
-
-            this.onWxEvent("login");
-            this.onWxEvent("onShow");
-            this.onWxEvent("initBanner");
-            this.onWxEvent("initVideo");
-        }
     }
 
     initShow(){
@@ -223,189 +191,12 @@ export default class Lobby extends cc.Component {
         }
     }
 
-    onWxEvent(s){
-        if (!CC_WECHATGAME) return;
-        let self = this;
-        switch(s){
-            case "initBanner":
-                if (this._bannerAd != null) this._bannerAd.show();
-                else {
-                    var systemInfo = wx.getSystemInfoSync();
-                    this._bannerAd = wx.createBannerAd({
-                        adUnitId: 'adunit-68a8244d86c7bf29',
-                        style: {
-                            left: 0,
-                            top: systemInfo.windowHeight - 144,
-                            width: 720,
-                        }
-                    });
-                    this._bannerAd.onResize(res => {
-                        if (self._bannerAd)
-                            self._bannerAd.style.top = systemInfo.windowHeight - self._bannerAd.style.realHeight;
-                    })
-                    this._bannerAd.show();
-                    this._bannerAd.onError(err => {
-                        console.log(err);
-                        //无合适广告
-                        if (err.errCode == 1004){
-
-                        }
-                    })
-                }
-                break;
-            case "initVideo":
-                this._videoAd = wx.createRewardedVideoAd({
-                    adUnitId: 'adunit-832cda6401b268ef'
-                });
-                this._videoAd.onClose(res => {
-                    if (res && res.isEnded || res === undefined){
-                        GLB.iHorse = self._iHorse;
-                        self.ndShop.active = false;
-                        self.onMatch();
-                    }else{
-
-                    }
-                });
-                this._videoAd.onError(err => {
-                  console.log(err)
-                });
-                break;
-            case "invite":
-                wx.shareAppMessage({
-                    title: "邀请对战！",
-                    imageUrl: canvas.toTempFilePathSync({
-                        destWidth: 500,
-                        destHeight: 400
-                    }),
-                    query: GLB.OpenID,
-                });
-                break;
-            case "onShow":
-                wx.onShow(function (res) {
-                    console.log("res.query=", res.query);
-                });
-                break;
-            case "share":
-                // var id = '' // 通过 MP 系统审核的图片编号
-                // var url = '' // 通过 MP 系统审核的图片地址
-                // wx.shareAppMessage({
-                //     imageUrlId: id,
-                //     imageUrl: url
-                // })
-                wx.shareAppMessage({
-                    title: "你来挑战我啊！",
-                    imageUrl: canvas.toTempFilePathSync({
-                        destWidth: 500,
-                        destHeight: 400
-                    })
-                });
-                break;
-            case "showVideo":
-                if (self._videoAd != null){
-                    self._videoAd.show()
-                    .catch(err => {
-                        self._videoAd.load()
-                        .then(() => self._videoAd.show())
-                    })
-                }
-                break;
-            case "auth":
-                wx.getSetting({
-                    success(res) {
-                        if (!res.authSetting['scope.userInfo']) {
-                            let dSize = self.node.getComponent(cc.Canvas).designResolution;
-                            self.UserInfoButton = wx.createUserInfoButton({
-                                type: 'text',
-                                text: '',
-                                withCredentials: GLB.withCredentials,
-                                style: {
-                                    left: 0,
-                                    top: 0,
-                                    width: dSize.width,
-                                    height: dSize.height,
-                                }
-                            })
-                            self.UserInfoButton.onTap((res) => {
-                                // console.log("Res = ", res);s
-                                if (res.userInfo){
-                                    GLB.userInfo = res.userInfo;
-                                    let str = GLB.OpenID+"&"+res.userInfo.nickName+"&"+res.userInfo.avatarUrl;
-                                    if (WS.sendMsg(GLB.WXLOGIN, str)){
-                                        // self.onMatch();
-                                        self.UserInfoButton.hide();
-                                    }
-                                }
-                            })
-                        }else{
-                            wx.getUserInfo({
-                                withCredentials: GLB.withCredentials,
-                                success(res){
-                                    // console.log("Res = ", res);
-                                    GLB.userInfo = res.userInfo;
-                                    let str = GLB.OpenID+"&"+res.userInfo.nickName+"&"+res.userInfo.avatarUrl;
-                                    WS.sendMsg(GLB.WXLOGIN, str);
-                                }
-                            })
-                        }
-                    }
-                })
-                break;
-            case "login":
-                // cc.sys.localStorage.setItem("OpenID", null);
-                GLB.OpenID = cc.sys.localStorage.getItem("OpenID");
-                // console.log("OpenID2 = ", GLB.OpenID);
-                if (GLB.OpenID){
-                    if (!GLB.userInfo) this.onWxEvent("auth");
-                }else {
-                    wx.login({
-                        success (res) {
-                            if (res.code) {
-                                //发起网络请求
-                                // console.log("code = ", res.code);
-                                wx.request({
-                                    // url: 'http://'+GLB.ip,
-                                    // url: "https://websocket.windgzs.cn/HorseRace/",
-                                    url: "https://websocket.guanzhiwangluogongyi.vip/",
-                                    data: {
-                                        code: res.code
-                                    },
-                                    success(response){
-                                        // console.log("success response = ", response);
-                                        // console.log("OpenID = ", response.data);
-                                        GLB.OpenID = response.data;
-                                        cc.sys.localStorage.setItem("OpenID", response.data);
-                                        self.onWxEvent("auth");
-                                    },
-                                    fail(response){
-                                        console.log("fail response = ", response);
-                                    }
-                                })
-                            } else {
-                                console.log('登录失败！' + res.errMsg)
-                            }
-                        }
-                    })
-                }
-                // wx.checkSession({ //用于检测SessionKey是否过期
-                //     success () {
-                //         //session_key 未过期，并且在本生命周期一直有效
-                //         if (!GLB.userInfo) this.onWxEvent("auth");
-                //     },
-                //     fail () {
-                //         // session_key 已经失效，需要重新执行登录流程
-                        
-                //     }
-                // })
-                break;
-        }
-    }
-
     playSound(sName){
         if (sName == "click") cc.audioEngine.play(this.audioClick, false, 1);
     }
 
     onMatch(){
-        // if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this) == false) return;
+        if (WS.sendMsg(GLB.MATCH, GLB.OpenID, this) == false) return;
         this._bMatch = true;
         this._iTime = 0;
         this.ndMatch.active = true;

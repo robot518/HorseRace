@@ -1,6 +1,6 @@
 package websocketx;
 
-import sun.security.ssl.Debug;
+//import sun.security.ssl.Debug;
 
 import java.io.*;
 import java.net.URL;
@@ -38,7 +38,7 @@ public class HttpUtils {
             } catch (IOException ex) {
             }
         }
-        Debug.println("result=----", result);
+//        Debug.println("result=----", result);
         return result;
     }
 }
